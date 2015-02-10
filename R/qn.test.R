@@ -185,7 +185,7 @@ for (i in 1:k){
 }
 if(test == "KW"){ scores.vec <- 1:n }
 if (test == "NS") {
-	if (!exists("normOrder")) library(SuppDists)
+#	if (!exists("normOrder")) library(SuppDists)
 	scores.vec <- normOrder(n)
 }
 if(test == "vdW") {
