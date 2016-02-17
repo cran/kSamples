@@ -1,22 +1,7 @@
-SteelConfInt <-function(...,conf.level=.95,alternative=c("less","greater","two.sided"),
-		method=c("asymptotic","exact","simulated"), Nsim = 10000, cc=.5){
-na.remove <- function(x){
-#
-# This function removes NAs from a list and counts the total 
-# number of NAs in na.total.
-# Returned is a list with the cleaned list x.new and with 
-# the count na.total of NAs.
-#
-	na.status <- lapply(x,is.na) # changed sapply to lapply
-	k <- length(x)
-	x.new <- list()
-	na.total <- 0
-	for( i in 1:k ){
-		x.new[[i]] <- x[[i]][!na.status[[i]]]
-		na.total <- na.total + sum(na.status[[i]])
-	}
-	list(x.new=x.new,na.total=na.total)
-} # end of na.remove
+SteelConfInt <-function(..., data = NULL, conf.level=.95,
+		alternative=c("less","greater","two.sided"),
+		method = c("asymptotic","exact","simulated"), Nsim = 10000){
+
 pmaxWilcox <- function(x,ns){
 #----------------------------------------------------------------------------------
 # computes the CDF of the maximum of standarized Wilcoxon statistics for each 
@@ -25,11 +10,11 @@ pmaxWilcox <- function(x,ns){
 # each of ns[i], i=2,..., length(ns)
 #----------------------------------------------------------------------------------
 	if(length(ns) < 2) return("ns has length < 2\n")
-	n0 <- ns[1]
+	n1 <- ns[1]
 	ni <- ns[-1]
 	s <- length(ni)
-	f1 <- sqrt(1+ni/(n0+1))
-	f2 <- sqrt(ni/(n0+1))
+	f1 <- sqrt(1+ni/(n1+1))
+	f2 <- sqrt(ni/(n1+1))
 	fx <- function(z,U,f1,f2){
  		fxx <- 1
 		for(i in 1:s){
@@ -61,18 +46,18 @@ qmaxWilcox <- function(p,ns){
 	uniroot(fx,c(a,b),ns,p)$root
 }
 # end of qmaxWilcox
-ProbWilcox <- function(U,n0,ni){
+ProbWilcox <- function(U,n1,ni){
 #-----------------------------------------------------------------------
 # computes the asymptotic joint probability P(W.i <= U[i], i=1,\ldots,s)
-# where W.i is the Mann-Whitney statistic for sample sizes n0 and ni[i], 
+# where W.i is the Mann-Whitney statistic for sample sizes n1 and ni[i], 
 # for i=1,...,s, and the same sample is involved for the first sample
-# of size n0 in all Mann-Whitney statistics.
+# of size n1 in all Mann-Whitney statistics.
 #-----------------------------------------------------------------------
 	s <- length(ni)
 	if(s < 1) return("ni has length < 1\n")
         if(length(U) != s) return(paste("U does not have length",s,"\n"))
-	f1 <- sqrt(1+ni/(n0+1))
-	f2 <- sqrt(ni/(n0+1))
+	f1 <- sqrt(1+ni/(n1+1))
+	f2 <- sqrt(ni/(n1+1))
 	fx <- function(z,U,f1,f2){
  		fxx <- 1
 		for(i in 1:s){
@@ -113,12 +98,7 @@ qdiscrete <- function (x, gam)
     list(cm = cm, cp = cp)
 }
 # end of qdiscrete function
-if (nargs() >= 1 & is.list(list(...)[[1]])) {
-       	samples <- list(...)[[1]]
-}else{
-        samples <- list(...)
-}
-if(cc != 0.5) cc <- 0
+samples <- io(..., data = data)
 alternative <- match.arg(alternative)
 method <- match.arg(method)
 out <- na.remove(samples)
@@ -146,11 +126,11 @@ k <- length(ns)
 s <- k-1
 # number of treatments
 rx <- rank(x)
-n0 <- ns[1]
+n1 <- ns[1]
 ni <- ns[-1]
-mu <- ni*n0/2 
+mu <- ni*n1/2 
 	# vector of means for Mann-Whitney statistics
-tau <- sqrt(n0*ni*(n0+ni+1)/12) 
+tau <- sqrt(n1*ni*(n1+ni+1)/12) 
 	# vector of stand. deviations of Mann-Whitney statistics
 	# in the case of continuous sampled populations (no ties).  
 n.ties <- nsamp - length(unique(x))
@@ -170,32 +150,32 @@ if(method == "exact"){
 # calculation of coverage probabilities based on asymptotics
 cgam <- qmaxWilcox(gam,ns)
 if(alternative != "greater"){
-	ellpU <- ceiling(tau*cgam+mu+1-cc)
+	ellpU <- ceiling(tau*cgam+mu+1)
 	ellpUx <- ellpU
-        ellpUx[ellpUx > n0*ni] <- Inf
-	ellmU <- floor(tau*cgam+mu+1-cc)
+        ellpUx[ellpUx > n1*ni] <- Inf
+	ellmU <- floor(tau*cgam+mu+1)
 	ellmUx <- ellmU
-        ellmUx[ellmUx > n0*ni] <- Inf
-	ellcU <- round(tau*cgam+mu+1-cc)
+        ellmUx[ellmUx > n1*ni] <- Inf
+	ellcU <- round(tau*cgam+mu+1)
 	ellcUx <- ellcU
-        ellcUx[ellcUx > n0*ni] <- Inf
-	probpU <- ProbWilcox((ellpUx-1-mu+cc)/tau,n0,ni)
-	probmU <- ProbWilcox((ellmUx-1-mu+cc)/tau,n0,ni)
-	probcU <- ProbWilcox((ellcUx-1-mu+cc)/tau,n0,ni)
+        ellcUx[ellcUx > n1*ni] <- Inf
+	probpU <- ProbWilcox((ellpUx-1-mu)/tau,n1,ni)
+	probmU <- ProbWilcox((ellmUx-1-mu)/tau,n1,ni)
+	probcU <- ProbWilcox((ellcUx-1-mu)/tau,n1,ni)
 }
 if(alternative != "less"){
-	ellmL <- ceiling(n0*ni-tau*cgam-mu+cc)
+	ellmL <- ceiling(n1*ni-tau*cgam-mu)
 	ellmLx <- ellmL
 	ellmLx[ellmLx < 1] <- -Inf
-	ellpL <- floor(n0*ni-tau*cgam-mu+cc)
+	ellpL <- floor(n1*ni-tau*cgam-mu)
 	ellpLx <- ellpL
 	ellpLx[ellpLx < 1] <- -Inf
-	ellcL <- round(n0*ni-tau*cgam-mu+cc)
+	ellcL <- round(n1*ni-tau*cgam-mu)
 	ellcLx <- ellcL
 	ellcLx[ellcLx < 1] <- -Inf
-	probpL <- ProbWilcox((n0*ni-ellpLx-mu+cc)/tau,n0,ni)
-	probmL <- ProbWilcox((n0*ni-ellmLx-mu+cc)/tau,n0,ni)
-	probcL <- ProbWilcox((n0*ni-ellcLx-mu+cc)/tau,n0,ni)
+	probpL <- ProbWilcox((n1*ni-ellpLx-mu)/tau,n1,ni)
+	probmL <- ProbWilcox((n1*ni-ellmLx-mu)/tau,n1,ni)
+	probcL <- ProbWilcox((n1*ni-ellcLx-mu)/tau,n1,ni)
 }
 # initializing asymptotic bounds
 Lboundp <- rep(-Inf,s)
@@ -335,17 +315,17 @@ if(method != "asymptotic"){
 		ellestU <- ellest+1
 	}
 	if(alternative == "greater"){
-		ellhatL <- n0*ni-ellhat
-		elltildeL <- n0*ni-elltilde
-		ellestL <- n0*ni-ellest
+		ellhatL <- n1*ni-ellhat
+		elltildeL <- n1*ni-elltilde
+		ellestL <- n1*ni-ellest
 	}
 	if(alternative == "two.sided"){
 		ellhatU <- ellhat+1
 		elltildeU <- elltilde+1
 		ellestU <- ellest+1
-		ellhatL <- n0*ni-ellhat
-		elltildeL <- n0*ni-elltilde
-		ellestL <- n0*ni-ellest
+		ellhatL <- n1*ni-ellhat
+		elltildeL <- n1*ni-elltilde
+		ellestL <- n1*ni-ellest
 		p.ellhat <- 1-2*(1-p.ellhat)
 		p.elltilde <- 1-2*(1-p.elltilde)
 		p.ellest <- 1-2*(1-p.ellest)
@@ -411,23 +391,23 @@ if(method != "asymptotic"){
 	}
 }
 if(alternative != "greater"){
-	istart <- n0
+	istart <- n1
 	for( i in 1:s ){
-		D <- sort(outer(x[(istart+1):(istart+ni[i])],x[1:n0],"-"))
-		if(ellUp[i] > n0*ni[i]){ 
+		D <- sort(outer(x[(istart+1):(istart+ni[i])],x[1:n1],"-"))
+		if(ellUp[i] > n1*ni[i]){ 
 			Uboundp[i] <- Inf}else{
 			Uboundp[i] <- D[ellUp[i]]
 		}
-		if(ellUc[i] > n0*ni[i]){ 
+		if(ellUc[i] > n1*ni[i]){ 
 			Uboundc[i] <- Inf}else{
 			Uboundc[i] <- D[ellUc[i]]
 		}
 		if(method != "asymptotic"){
-			if(ellUXp[i] > n0*ni[i]){ 
+			if(ellUXp[i] > n1*ni[i]){ 
 				UboundXp[i] <- Inf}else{
 				UboundXp[i] <- D[ellUXp[i]]
 			}
-			if(ellUXc[i] > n0*ni[i]){ 
+			if(ellUXc[i] > n1*ni[i]){ 
 				UboundXc[i] <- Inf}else{
 				UboundXc[i] <- D[ellUXc[i]]
 			}
@@ -436,9 +416,9 @@ if(alternative != "greater"){
 	}
 }
 if(alternative != "less"){
-	istart <- n0
+	istart <- n1
 	for( i in 1:s ){
-		D <- sort(outer(x[(istart+1):(istart+ni[i])],x[1:n0],"-"))
+		D <- sort(outer(x[(istart+1):(istart+ni[i])],x[1:n1],"-"))
 		if(ellLp[i] < 1){
 			Lboundp[i] <- -Inf}else{	
 			Lboundp[i] <- D[ellLp[i]]
@@ -514,7 +494,7 @@ out <- list(conservative.bounds.asymptotic = outA,
 }
 
 outx <- list(test.name = "Steel.bounds",
-	 	n0 = n0, ns = ni, N = nsamp,n.ties=n.ties,
+	 	n1 = n1, ns = ni, N = nsamp,n.ties=n.ties,
 		bounds=out,method=method,Nsim=Nsim,i.LU=i.LU,i.LUX=i.LUX)
 class(outx) <- "kSamples"
 outx		

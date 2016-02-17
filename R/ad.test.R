@@ -1,5 +1,6 @@
 ad.test <-
-function (...,method=c("asymptotic","simulated","exact"),dist=FALSE,Nsim=10000) 
+function (..., data = NULL,
+  method=c("asymptotic","simulated","exact"),dist=FALSE,Nsim=10000) 
 {
 #############################################################################
 # This function "ad.test" tests whether k samples (k>1) come from a common
@@ -26,9 +27,19 @@ function (...,method=c("asymptotic","simulated","exact"),dist=FALSE,Nsim=10000)
 #
 # 
 # Inputs:
-#       	...:	can either be a sequence of k (>1) sample vectors 
-#					or a list of k (>1) sample vectors.
+#       	...:	can either be a sequence of k (>1) sample vectors,
+#
+#				or a list of k (>1) sample vectors,
+#
+#                               or y, g, where y contains the concatenated
+#				samples and g is a factor which by its levels
+#				identifies the samples in y,
+#
+#                               or a formula y ~ g with y and g as in previous case.
+#
 #				
+#               data:   data frame with variables usable in formula input, default = NULL.
+#
 #			method: takes values "asymptotic", "simulated", or "exact".
 #					The value "asymptotic" causes calculation of P-values
 #            		using the asymptotic approximation, always done.
@@ -131,142 +142,123 @@ function (...,method=c("asymptotic","simulated","exact"),dist=FALSE,Nsim=10000)
 # Fritz Scholz, August 2012
 #
 #################################################################################
-na.remove <- function(x){
-#
-# This function removes NAs from a list and counts the total 
-# number of NAs in na.total.
-# Returned is a list with the cleaned list x.new and with 
-# the count na.total of NAs.
-#
-	na.status <- lapply(x,is.na) # changed sapply to lapply
-	k <- length(x)
-	x.new <- list()
-	na.total <- 0
-	for( i in 1:k ){
-		x.new[[i]] <- x[[i]][!na.status[[i]]]
-		na.total <- na.total + sum(na.status[[i]])
+	samples <- io(...,data = data)
+	method <- match.arg(method)
+	out <- na.remove(samples)
+	na.t <- out$na.total
+	if( na.t > 1) print(paste("\n",na.t," NAs were removed!\n\n"))
+	if( na.t == 1) print(paste("\n",na.t," NA was removed!\n\n"))
+	samples <- out$x.new
+	k <- length(samples)
+	if (k < 2) stop("Must have at least two samples.")
+	ns <- sapply(samples, length)
+	if (any(ns == 0)) stop("One or more samples have no observations.")
+	x <- unlist(samples)
+	n <- length(x)
+	Z.star <- sort(unique(x))
+	L <- length(Z.star)
+	if(dist == TRUE) Nsim <- min(Nsim,1e8) 
+	# limits the size of null.dist1 and null.dist2
+	# whether method = "exact" or = "simulated"
+	ncomb <- 1
+	np <- n
+    	for(i in 1:(k-1)){
+		ncomb <- ncomb * choose(np,ns[i])
+       		np <- np-ns[i]
 	}
-	list(x.new=x.new,na.total=na.total)
-}
-	if (nargs() >= 1 & is.list(list(...)[[1]])) {
-        samples <- list(...)[[1]]
-    }
-    else {
-        samples <- list(...)
-    }
-    method <- match.arg(method)
-    out <- na.remove(samples)
-    na.t <- out$na.total
-    if( na.t > 1) cat(paste("\n",na.t," NAs were removed!\n\n"))
-    if( na.t == 1) cat(paste("\n",na.t," NA was removed!\n\n"))
-    samples <- out$x.new
-    k <- length(samples)
-    if (k < 2)
-        stop("Must have at least two samples.")
-    ns <- sapply(samples, length)
-    if (any(ns == 0)) 
-        stop("One or more samples have no observations.")
-    x <- NULL
-    for (i in 1:k) x <- c(x, samples[[i]])
-    n <- length(x)
-    Z.star <- sort(unique(x))
-
-    L <- length(Z.star)
-    ncomb <- choose(n,ns[1])
-    np <- n-ns[1]
-    if(k>2){
-    	for(i in 2:(k-1)){
-			ncomb <- ncomb * choose(np,ns[i])
-        	np <- np-ns[i]
-		}
+	# it is possible that ncomb overflows to Inf
+	if( method == "exact" & Nsim < ncomb) {
+		method <- "simulated"
 	}
-  	if(method=="exact" & Nsim < ncomb) method <- "simulated"
-    dist1 <- NULL
-    dist2 <- NULL
+	if( method == "exact" & dist == TRUE ) nrow <- ncomb
+   	if( method == "simulated" & dist == TRUE ) nrow <- Nsim
+	if( method == "simulated" ) ncomb <- 1 # don't need ncomb anymore
+	if(method == "asymptotic"){
+		Nsim <- 1
+		dist <- FALSE
+	}
+	dist1 <- NULL
+	dist2 <- NULL
 	pv <- c(NA,NA)
-    getA2mat <- dist
-    useExact <- FALSE
-    if(method == "exact") useExact <- TRUE
-
-	if (ncomb <= Nsim && useExact) {
-		nrow <- ncomb
-		useExact <- TRUE
-	} else {
-		nrow <- Nsim
-		useExact <- FALSE
+	getA2mat <- dist
+	useExact <- FALSE
+	if(method == "exact") useExact <- TRUE
+	if(getA2mat){
+		a2mat <- matrix(0,nrow=nrow,ncol=2)}else{
+		a2mat <- 0
 	}
-	out0 <- .Call('doAdkTestStat', as.integer(k), as.double(x), 
-		as.integer(ns), as.double(Z.star) )
-	if(method != "asymptotic"){
-		out1 <- .Call('doAdkPVal', as.integer(Nsim), as.integer(k), as.double(x), 
-			as.integer(ns), as.double(Z.star), as.integer(useExact), as.double(ncomb),
-			as.integer(getA2mat))
-    	pv <- out1[1:2]
+	ans <- numeric(2)
+        pval <- numeric(2)
+	out0 <- .C("adkTestStat0",ans=as.double(ans),k=as.integer(k),x=as.double(x),
+		ns=as.integer(ns),Z.star=as.double(Z.star),L=as.integer(L))
+	if(method != "asymptotic"){	
+		out1 <- .C("adkPVal0",pval=as.double(pval), Nsim=as.integer(Nsim),k=as.integer(k),
+				x=as.double(x),ns=as.integer(ns),
+				zstar=as.double(Z.star),L=as.integer(L),
+				useExact=as.integer(useExact),getA2mat=as.integer(getA2mat),
+				ncomb=as.double(ncomb),a2mat=as.double(a2mat))
+	    	pv <- out1$pval
   		if(getA2mat){
-    		a2mat <- matrix(out1[-(1:2)], nrow=nrow, ncol=2, byrow=FALSE, 
-					dimnames=list(NULL, c("AkN2", "AakNk2")))
-    		dist1 <- round(a2mat[,1],8)
-    		dist2 <- round(a2mat[,2],8)
+    			a2mat <- matrix(out1$a2mat, nrow=nrow, ncol=2, byrow=FALSE, 
+			 		dimnames=list(NULL, c("AkN2", "AakNk2")))
+    			dist1 <- round(a2mat[,1],8)
+    			dist2 <- round(a2mat[,2],8)
 		}
 	}
-    AkN2 <- out0[1]
-    AakN2 <- out0[2]
-
-    coef.d <- 0
-    coef.c <- 0
-    coef.b <- 0
-    coef.a <- 0
-    H <- sum(1/ns)
-    h <- sum(1/(1:(n - 1)))
-    g <- 0
-    for (i in 1:(n - 2)) {
-        g <- g + (1/(n - i)) * sum(1/((i + 1):(n - 1)))
-    }
-    coef.a <- (4 * g - 6) * (k - 1) + (10 - 6 * g) * H
-    coef.b <- (2 * g - 4) * k^2 + 8 * h * k + (2 * g - 14 * h - 
-        4) * H - 8 * h + 4 * g - 6
-    coef.c <- (6 * h + 2 * g - 2) * k^2 + (4 * h - 4 * g + 6) * 
-        k + (2 * h - 6) * H + 4 * h
-    coef.d <- (2 * h + 6) * k^2 - 4 * h * k
-    sig2 <- (coef.a * n^3 + coef.b * n^2 + coef.c * n + coef.d)/((n - 
-        1) * (n - 2) * (n - 3))
-
-    sig <- sqrt(sig2)
-    TkN <- (AkN2 - (k - 1))/sig
-    TakN <- (AakN2 - (k - 1))/sig
-    pvalTkN <- ad.pval(TkN, k - 1,1)
-    pvalTakN <- ad.pval(TakN, k - 1,2)
-    warning <- min(ns) < 5
-    if(method=="asymptotic"){
-     	ad.mat <- matrix(c(signif(AkN2,5), signif(TkN, 5), 
-			signif(pvalTkN, 5), signif(AakN2,3) , 
-			signif(TakN, 5), signif(pvalTakN, 5)), 
-			byrow = TRUE, ncol = 3)
-	}else{
-     	ad.mat <- matrix(c(signif(AkN2,5), signif(TkN, 5), 
-			signif(pvalTkN, 5),  signif(pv[1],5),signif(AakN2,3) , 
-			signif(TakN, 5), signif(pvalTakN, 5), 
-			signif(pv[2],5)), byrow = TRUE, ncol = 4)
+	AkN2 <- out0[[1]][1]
+	AakN2 <- out0[[1]][2]
+	coef.d <- 0
+	coef.c <- 0
+	coef.b <- 0
+	coef.a <- 0
+	H <- sum(1/ns)
+	h <- sum(1/(1:(n - 1)))
+	g <- 0
+	for (i in 1:(n - 2)) {
+	        g <- g + (1/(n - i)) * sum(1/((i + 1):(n - 1)))
 	}
-    if(method=="asymptotic"){
+	coef.a <- (4 * g - 6) * (k - 1) + (10 - 6 * g) * H
+	coef.b <- (2 * g - 4) * k^2 + 8 * h * k + (2 * g - 14 * h - 
+	        4) * H - 8 * h + 4 * g - 6
+	coef.c <- (6 * h + 2 * g - 2) * k^2 + (4 * h - 4 * g + 6) * 
+	        k + (2 * h - 6) * H + 4 * h
+	coef.d <- (2 * h + 6) * k^2 - 4 * h * k
+	sig2 <- (coef.a * n^3 + coef.b * n^2 + coef.c * n + coef.d)/((n - 
+	        1) * (n - 2) * (n - 3))
+	sig <- sqrt(sig2)
+	TkN <- (AkN2 - (k - 1))/sig
+	TakN <- (AakN2 - (k - 1))/sig
+	pvalTkN <- ad.pval(TkN, k - 1,1)
+	pvalTakN <- ad.pval(TakN, k - 1,2)
+	warning <- min(ns) < 5
+	if(method=="asymptotic"){
+	     	ad.mat <- matrix(c(signif(AkN2,5), signif(TkN, 5), 
+				signif(pvalTkN, 5), signif(AakN2,3) , 
+				signif(TakN, 5), signif(pvalTakN, 5)), 
+				byrow = TRUE, ncol = 3)
+	}else{
+  	   	ad.mat <- matrix(c(signif(AkN2,5), signif(TkN, 5), 
+				signif(pvalTkN, 5),  signif(pv[1],5),signif(AakN2,3) , 
+				signif(TakN, 5), signif(pvalTakN, 5), 
+				signif(pv[2],5)), byrow = TRUE, ncol = 4)
+	}
+    	if(method=="asymptotic"){
 		dimnames(ad.mat) <- list(c("version 1:","version 2:"),
 						c("AD","T.AD"," asympt. P-value"))
-    }
-    if(method=="exact"){
+    	}
+    	if(method=="exact"){
 		dimnames(ad.mat) <- list(c("version 1:","version 2:"),
 						c("AD","T.AD"," asympt. P-value"," exact P-value"))
-    }
-    if(method=="simulated"){
+    	}
+    	if(method=="simulated"){
 		dimnames(ad.mat) <- list(c("version 1:","version 2:"),
 						c("AD","T.AD"," asympt. P-value"," sim. P-value"))
-    }
-
-    object <- list(test.name ="Anderson-Darling",
+    	}
+	object <- list(test.name ="Anderson-Darling",
 				k = k, ns = ns, N = n, n.ties = n - L, sig = round(sig, 5), 
 				ad = ad.mat, warning = warning, null.dist1 = dist1, 
 				null.dist2 = dist2, method=method, Nsim=Nsim)
-    class(object) <- "kSamples"
-    object
-
+	class(object) <- "kSamples"
+	object
 }
 

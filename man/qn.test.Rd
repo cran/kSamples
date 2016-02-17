@@ -9,21 +9,28 @@ the hypothesis that \eqn{k} independent samples arise
 from a common unspecified distribution.
 }
 \usage{
-qn.test(\dots, test = c("KW", "vdW", "NS"), 
+qn.test(\dots, data = NULL, test = c("KW", "vdW", "NS"), 
 	method = c("asymptotic", "simulated", "exact"),
 	dist = FALSE, Nsim = 10000)
 }
 \arguments{
-  	\item{\dots}{
+	\item{\dots}{
 		Either several sample vectors, say 
-		\eqn{x_1, \ldots , x_k}{x.1, \ldots , x.k}, 
-		with \eqn{x_i}{x.i} containing \eqn{n_i}{n.i} sample values, with
-		\eqn{N=n_1+\ldots+n_k}{N=n.1+\ldots+n.k} denoting the pooled sample size.
-		\eqn{n_i > 4}{n.i > 4} is recommended for reasonable asymptotic 
-		\eqn{P}-value calculation.
+		\eqn{x_1, \ldots, x_k}, 
+		with \eqn{x_i} containing \eqn{n_i} sample values.
+		\eqn{n_i > 4} is recommended for reasonable asymptotic 
+		\eqn{P}-value calculation. The pooled sample size is denoted 
+		by \eqn{N=n_1+\ldots+n_k},
 
-		or a list of such sample vectors. 
+		or a list of such sample vectors,
+
+		or a formula y ~ g, where y contains the pooled sample values 
+		and g (same length as y) is a factor with levels identifying 
+		the samples to which the elements of y belong. 
 	}
+
+    	\item{data}{= an optional data frame providing the variables in formula y ~ g.
+		}
 	\item{test}{= \code{c("KW", "vdW", "NS")}, where
 
 		\code{"KW"} uses scores \code{1:N} (Kruskal-Wallis test)
@@ -33,40 +40,42 @@ qn.test(\dots, test = c("KW", "vdW", "NS"),
 		\code{"NS"} uses normal scores, i.e., expected standard normal order statistics,
 		invoking function \code{normOrder} of \code{package SuppDists}
 	}
-    \item{method}{= \code{c("asymptotic","simulated","exact")}, where
+    	\item{method}{= \code{c("asymptotic","simulated","exact")}, where
 
 		\code{"asymptotic"} uses only an asymptotic chi-square approximation 
 		with \code{k-1} degrees of freedom to approximate the \eqn{P}-value. 
 		This calculation is always done.
 
-		\code{"simulated"} uses \code{Nsim} simulated \eqn{QN} statistics based on random splits of the 
-		pooled samples into samples of sizes 
-		\eqn{n_1, \ldots, n_k}{n.1, \ldots, n.k}, to estimate the \eqn{P}-value.
+		\code{"simulated"} uses \code{Nsim} simulated \eqn{QN} statistics based on random 
+		splits of the pooled samples into samples of sizes 
+		\eqn{n_1, \ldots, n_k}, to estimate the \eqn{P}-value.
 
 		\code{"exact"} uses full enumeration of all sample splits with resulting 
 		\eqn{QN} statistics to obtain the exact \eqn{P}-value. 
-     	It is used only when \code{Nsim} is
-      	at least as large as the number of full enumerations. Otherwise, \code{method}
-		reverts to \code{"simulated"} using the given \code{Nsim}.
-    }
+     		It is used only when \code{Nsim} is at least as large as the number
+		\deqn{ncomb = \frac{N!}{n_1!\ldots n_k!}}{N!/(n_1!\ldots n_k!)} of
+		full enumerations. Otherwise, \code{method}
+		reverts to \code{"simulated"} using the given \code{Nsim}. It also reverts
+		to \code{"simulated"} when \eqn{ncomb > 1e8} and \code{dist = TRUE}.
+    	}
 	\item{dist}{\code{FALSE} (default) or \code{TRUE}. If \code{TRUE}, the 
 		simulated or fully enumerated null distribution vector \code{null.dist} 
-		is returned for the \eqn{QN} test statistic.
+		is returned for the \eqn{QN} test statistic. Otherwise, \code{NULL} 
+		is returned. When \code{dist = TRUE} then \code{Nsim <- min(Nsim, 1e8)}, 
+		to limit object size.
 	}
 	\item{Nsim}{\code{= 10000} (default), number of simulation sample splits to use.	
 		It is only used when \code{method = "simulated"},
-		or when \code{method = "exact"} reverts to \code{method = "simulated"}, 
-		as previously explained.
+		or when \code{method = "exact"} reverts to \code{method =}
+		\code{ "simulated"}, as previously explained.
 	}
-
 }
 \details{
-The \eqn{QN} criterion based on rank scores \eqn{v_1,\ldots,v_N}{v.1,\ldots,v.N} is
-\deqn{QN=\frac{1}{s_v^2}\left(\sum_{i=1}^k \frac{(S_{iN}-n_i \bar{v}_{N})^2}{n_i}\right)}{
-[ sum (S.iN - n.i * vbar.N)^2/n.i ] / s.v^2} 
-where \eqn{S_{iN}}{S.iN} is the sum of rank scores for the \eqn{i}-th sample and 
-\eqn{\bar{v}_N}{vbar.N} and 
-\eqn{s_v^2}{s.v^2} are sample mean and sample variance (denominator \eqn{N-1})
+The \eqn{QN} criterion based on rank scores \eqn{v_1,\ldots,v_N} is
+\deqn{QN=\frac{1}{s_v^2}\left(\sum_{i=1}^k \frac{(S_{iN}-n_i \bar{v}_{N})^2}{n_i}\right)}
+where \eqn{S_{iN}} is the sum of rank scores for the \eqn{i}-th sample and 
+\eqn{\bar{v}_N} and 
+\eqn{s_v^2} are sample mean and sample variance (denominator \eqn{N-1})
 of all scores.
 
 The statistic \eqn{QN} is used to test the hypothesis that the samples all come 
@@ -81,7 +90,7 @@ For small sample sizes exact null distribution
 calculations are possible (with or without ties), based on a recursively extended
 version of Algorithm C (Chase's sequence) in Knuth (2011), which allows the 
 enumeration of all possible splits of the pooled data into samples of
-sizes of \eqn{n_1, \ldots, n_k}{n.1, \ldots, n.k}, as appropriate under treatment randomization. This 
+sizes of \eqn{n_1, \ldots, n_k}, as appropriate under treatment randomization. This 
 is done in C, as is the simulation.
 
 NA values are removed and the user is alerted with the total NA count.
@@ -102,13 +111,13 @@ A list of class \code{kSamples} with components
 
 \code{"normal scores"}}
 \item{k}{number of samples being compared}
-\item{ns}{vector \eqn{(n_1,\ldots,n_k)}{(n.1, \ldots, n.k)} of the \eqn{k} sample sizes}
-\item{N}{size of the pooled sample \eqn{= n_1+\ldots+n_k}{= n.1+\ldots+n.k}}
+\item{ns}{vector \eqn{(n_1,\ldots,n_k)} of the \eqn{k} sample sizes}
+\item{N}{size of the pooled samples \eqn{= n_1+\ldots+n_k}}
 \item{n.ties}{number of ties in the pooled sample}
 \item{qn}{2 (or 3) vector containing the observed \eqn{QN}, its asymptotic \eqn{P}-value, 
 (its simulated or exact \eqn{P}-value)}
 \item{warning}{logical indicator, \code{warning = TRUE} when at least one 
-\eqn{n_i < 5}{n.i < 5}}
+\eqn{n_i < 5}}
 \item{null.dist}{simulated or enumerated null distribution 
 of the test statistic. It is \code{NULL} when \code{dist = FALSE} or when
 \code{method = "asymptotic"}.}
@@ -153,11 +162,17 @@ Springer Verlag.
 u1 <- c(1.0066, -0.9587,  0.3462, -0.2653, -1.3872)
 u2 <- c(0.1005, 0.2252, 0.4810, 0.6992, 1.9289)
 u3 <- c(-0.7019, -0.4083, -0.9936, -0.5439, -0.3921)
-out.qn <- qn.test(u1,u2,u3,test="KW",method="simulated",dist=FALSE,Nsim=1000)
-# or
-# out.qn <- qn.test(list(u1,u2,u3),test="KW",method="simulated",
-#		dist=FALSE,Nsim=1000)
-# names(out.qn)
+yy <- c(u1, u2, u3)
+gy <- as.factor(c(rep(1,5), rep(2,5), rep(3,5)))
+set.seed(2627)
+qn.test(u1, u2, u3, test="KW", method = "simulated", 
+  dist = FALSE, Nsim = 1000)
+# or with same seed
+# qn.test(list(u1, u2, u3),test = "KW", method = "simulated", 
+#  dist = FALSE, Nsim = 1000)
+# or with same seed
+# qn.test(yy ~ gy, test = "KW", method = "simulated", 
+#  dist = FALSE, Nsim = 1000)
 }
 
 \keyword{nonparametric}

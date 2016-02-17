@@ -1,7 +1,7 @@
 Steel.test <-
-function (..., method=c("asymptotic","simulated","exact"),
+function (..., data = NULL, method=c("asymptotic","simulated","exact"),
 		alternative = c("greater","less","two-sided"),
-		continuity.corr=TRUE, dist=FALSE,Nsim=10000) 
+		dist=FALSE,Nsim=10000) 
 {
 #############################################################################
 # This function "Steel.test" tests whether k-1 samples (k>1) come from the
@@ -28,10 +28,15 @@ function (..., method=c("asymptotic","simulated","exact"),
 #
 # 
 # Inputs:
-#       	...:	can either be a sequence of k (>1) sample vectors 
-#                       of which the first represents the control sample,
-#					or a list of such k (>1) sample vectors.
+#       	...:	can either be a sequence of k (>1) sample vectors,
 #
+#				or a list of k (>1) sample vectors,
+#
+#                               or y, g, where y contains the concatenated
+#				samples and g is a factor which by its levels
+#				identifies the samples in y,
+#
+#                               or a formula y ~ g with y and g as in previous case.
 #				
 #		method: takes values "asymptotic", "simulated", or "exact".
 #			The value "asymptotic" causes calculation of P-values based
@@ -73,9 +78,6 @@ function (..., method=c("asymptotic","simulated","exact"),
 #			treatment rank sum is used as test statistic. The test rejects 
 #                       for large values of this maximum.
 #
-# 		continuity.corr: default TRUE, causes the use of a continuity correction
-#                       in the normal approximation. This is only used when there are no ties.
-#
 #
 #		dist: 	= FALSE (default) or TRUE, TRUE causes the simulated
 #			or fully enumerated vector of the Steel statistic 
@@ -98,10 +100,10 @@ function (..., method=c("asymptotic","simulated","exact"),
 # z4 <- c( 92, 114,  86, 119, 131,  94)
 #set.seed(27)
 #Steel.test(z1,z2,z3,z4,method="simulated",
-#   alternative="less",continuity.corr=T,Nsim=100000)
+#   alternative="less",Nsim=100000)
 # or
 #Steel.test(list(z1,z2,z3,z4),method="simulated",
-#   alternative="less",continuity.corr=T,Nsim=100000)
+#   alternative="less",Nsim=100000)
 #produces the output below.
 #
 #  Steel Mutiple Wilcoxon Test: k treatments against a common control
@@ -121,7 +123,7 @@ function (..., method=c("asymptotic","simulated","exact"),
 #############################################################################
 # In order to get the output list, call 
 # st.out <- Steel.test(list(z1,z2,z3,z4),method="simulated",
-#   alternative="less",continuity.corr=T,Nsim=100000)
+#   alternative="less",Nsim=100000)
 # then st.out is of class ksamples and has components 
 # names(st.out)
 # > names(st.out)
@@ -163,91 +165,10 @@ function (..., method=c("asymptotic","simulated","exact"),
 # Fritz Scholz, May 2012
 #
 #################################################################################
-na.remove <- function(x){
-#
-# This function removes NAs from a list and counts the total 
-# number of NAs in na.total.
-# Returned is a list with the cleaned list x.new and with 
-# the count na.total of NAs.
-#
-	na.status <- lapply(x,is.na) # changed sapply to lapply
-	k <- length(x)
-	x.new <- list()
-	na.total <- 0
-	for( i in 1:k ){
-		x.new[[i]] <- x[[i]][!na.status[[i]]]
-		na.total <- na.total + sum(na.status[[i]])
-	}
-	list(x.new=x.new,na.total=na.total)
-} # end of na.remove
 
-Steelnormal <- function(mu,sig0,sig,tau,Wvec,ni,
-		alternative=c("greater","less","two-sided"),continuity.corr=TRUE){
-# this function computes the normal approximation of the p-value for the Steel test,
-# based on the sizes ni = c(n1,...,nk) of the k treatment samples
-# based on the vector of Mann-Whitney statistics comparing the treatment sample values (Y)
-# against the common control sample values (X), Wvec consists of k such comparison statistics
-# counting X_i < Y_j and 0.5 of X_i = Y_j.
-# mu , sig0, sig, and, tau are parameters required for the power evaluation. 
-alternative <- match.arg(alternative)
-if(continuity.corr==TRUE){
-	cont.corr <- .5
-}else{
-	cont.corr <- 0
-}
-k <- length(ni)
-if(alternative=="greater"){ 
- Sx <- max((Wvec-mu)/tau)
- i0 <- min((1:k)[Sx == (Wvec-mu)/tau])
- S <- (Wvec[i0]-cont.corr-mu[i0])/tau[i0]
- funz <- function(z,k,sig0,sig,tau,S,ni){
-		fac <- 1
-		for(i in 1:k){
-			fac <- fac * pnorm((S*tau[i]-ni[i]*sig0*z)/sig[i])
-		}
-		dnorm(z)*fac
-	}
-pval <- 1-integrate(funz,-Inf,Inf,k,sig0,sig,tau,S,ni)$value
-}
-if(alternative=="less"){ 
- Sx <- min((Wvec-mu)/tau)
- i0 <- min((1:k)[Sx == (Wvec-mu)/tau])
- S <- (Wvec[i0]+cont.corr-mu[i0])/tau[i0]
- funz <- function(z,k,sig0,sig,tau,S,ni){
-		fac <- 1
-		for(i in 1:k){
-			fac <- fac * (1-pnorm((S*tau[i]-ni[i]*sig0*z)/sig[i]))
-		}
-		dnorm(z)*fac
-	}
-pval <- 1-integrate(funz,-Inf,Inf,k,sig0,sig,tau,S,ni)$value
-}
-if(alternative=="two-sided"){ 
- Sx <- max(abs(Wvec-mu)/tau)
- i0 <- min((1:k)[Sx == abs(Wvec-mu)/tau])
- S <- (abs(Wvec[i0]-mu[i0])-cont.corr)/tau[i0]
- funz <- function(z,k,sig0,sig,tau,S,ni){
-		fac <- 1
-		for(i in 1:k){
-			fac <- fac * (pnorm((S*tau[i]-ni[i]*sig0*z)/sig[i])-
-				pnorm((-S*tau[i]-ni[i]*sig0*z)/sig[i]))
-		}
-		dnorm(z)*fac
-	}
-pval <- 1-integrate(funz,-Inf,Inf,k,sig0,sig,tau,S,ni)$value
-}
-pval
 
-}
-# end of Steelnormal
+samples <- io(..., data = data)
 
-# checking whether samples are entered individuallyy or as list,
-# in the former case they are turned into list format.
-if (nargs() >= 1 & is.list(list(...)[[1]])) {
-       	samples <- list(...)[[1]]
-}else{
-        samples <- list(...)
-}
 method <- match.arg(method)
 alternative <- match.arg(alternative)
 if(alternative=="greater") alt <- 1
@@ -255,29 +176,39 @@ if(alternative=="less") alt <- -1
 if(alternative=="two-sided") alt <- 0
 out <- na.remove(samples)
 na.t <- out$na.total
-if( na.t > 1) cat(paste("\n",na.t," NAs were removed!\n\n"))
-if( na.t == 1) cat(paste("\n",na.t," NA was removed!\n\n"))
+if( na.t > 1) print(paste("\n",na.t," NAs were removed!\n\n"))
+if( na.t == 1) print(paste("\n",na.t," NA was removed!\n\n"))
 samples <- out$x.new
 k <- length(samples)
 if (k < 2) stop("Must have at least two samples.")
 ns <- sapply(samples, length)
+
+
+
 n <- sum(ns)
 if (any(ns == 0)) stop("One or more samples have no observations.")
-x <- numeric(n)
-istart <- 0
-for (i in 1:k){
-	x[istart+(1:ns[i])] <- samples[[i]]
-	istart <- istart + ns[i]		
+x <- unlist(samples)
+
+# reverse the sign of x to change testing alt = -1 to alt = 1
+if(alt==-1){
+	x <- -x
+	alt <- 1
 }
+
 Wvec <- numeric(k-1)
+xst <- 0
 for(i in 2:k){
-Wvec[i-1] <- sum(rank(c(samples[[1]],samples[[i]]))[ns[1]+1:ns[i]])-ns[i]*(ns[i]+1)/2
+xst <- xst + ns[i-1]
+Wvec[i-1] <- sum( rank( c(x[1:ns[1]],x[xst+1:ns[i]]) )[ns[1]+1:ns[i]])-ns[i]*(ns[i]+1)/2
 }
 Steelobs <- 0
 pval <- 0
 rx <- rank(x)
+
+
+
+
 dvec <- as.vector(table(rx))
-if(max(dvec)>1) continuity.corr <- F
 d2 <- sum(dvec*(dvec-1))
 d3 <- sum(dvec*(dvec-1)*(dvec-2))
 n2 <- n*(n-1)
@@ -292,44 +223,57 @@ tau <- sqrt(ni^2 * sig02 + sig2)
 mu <- n0*ni/2
 L <- length(unique(rx))
 # computing total number of combination splits
-ncomb <- choose(n,ns[1])
-np <- n-ns[1]
-if(k>2){
-	for(i in 2:(k-1)){
-		ncomb <- ncomb * choose(np,ns[i])
-        	np <- np-ns[i]
-	}
+if(dist == TRUE) Nsim <- min(Nsim,1e8) 
+# limits the size of null.dist
+# whether method = "exact" or = "simulated"
+ncomb <- 1
+np <- n
+for(i in 1:(k-1)){
+	ncomb <- ncomb * choose(np,ns[i])
+      	np <- np-ns[i]
 }
-useExact <- FALSE
+# it is possible that ncomb overflows to Inf
+if( method == "exact" & Nsim < ncomb) {
+	method <- "simulated"
+}
+if( method == "exact" & dist == TRUE ) nrow <- ncomb
+if( method == "simulated" & dist == TRUE ) nrow <- Nsim
+if( method == "simulated" ) ncomb <- 1 # don't need ncomb anymore
 if(method == "asymptotic"){
 	Nsim <- 1
 	dist <- FALSE
 }
-nrow <- Nsim
-if(method == "exact" & Nsim < ncomb) method <- "simulated"
-if(method == "exact") useExact <- TRUE
+useExact <- FALSE
+if( method == "exact") useExact <- TRUE
 if(useExact){nrow <- ncomb}
 if(dist==TRUE){
 	Steelvec <- numeric(nrow)
 }else{
-    	Steelvec <- NULL
+    	Steelvec <- 0
 }
+
 out <- .C("Steeltest", pval=as.double(pval),
 		Nsim=as.integer(Nsim), k=as.integer(k), 
 		rx=as.double(rx), ns=as.integer(ns), 
             	useExact=as.integer(useExact),
 		getSteeldist=as.integer(dist),
-		ncomb=as.double(nrow), alt=as.integer(alt),
+		ncomb=as.double(ncomb), alt=as.integer(alt),
                 mu=as.double(mu), tau=as.double(tau),
 		Steelobs=as.double(Steelobs),
 		Steelvec = as.double(Steelvec))
 Steelobs <- out$Steelobs
+# changes Steelobs back to make up for earlier sign change
+if(alternative == "less") Steelobs <- -Steelobs
 pval <- out$pval
 if(dist){
 	Steelvec <- out$Steelvec
+	if(alternative == "less") Steelvec <- - Steelvec
 }
-
-pval.asympt <- Steelnormal(mu,sig0,sig,tau,Wvec,ni,alternative,continuity.corr)
+if(dist == F | method == "asymptotic") Steelvec <- NULL
+if(alternative != "less"){
+	pval.asympt <- Steelnormal(mu,sig0,sig,tau,Wvec,ni,alternative)}else{
+	pval.asympt <- Steelnormal(mu,sig0,sig,tau,Wvec,ni,"greater")
+}
 if(method=="asymptotic"){
 	st <- c(Steelobs,pval.asympt)
 }else{
@@ -348,10 +292,10 @@ warning <- FALSE
 if(min(ns) < 5) warning <- TRUE
 if(dist == FALSE) null.dist <- NULL
 
-object <- list(test.name = "Steel",
-		k = k, ns = ns, N = n, n.ties = n - L,
+object <- list(test.name = "Steel", k = k, alternative = alternative,
+		ns = ns, N = n, n.ties = n - L,
 		st = st, warning = warning, null.dist = Steelvec,
-		method=method, Nsim=Nsim, mu=mu, sig0=sig0, sig=sig, tau=tau, W=Wvec)
+		method=method, Nsim=Nsim, W=Wvec, mu=mu, tau=tau, sig0=sig0, sig=sig)
     class(object) <- "kSamples"
     object
 

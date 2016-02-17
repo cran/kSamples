@@ -11,45 +11,46 @@ for two responses
 }
 \usage{
 contingency2xt.comb(\dots, 
-method = c("asymptotic", "simulated", "exact"), 
-dist = FALSE, Nsim = 10000)
+	method = c("asymptotic", "simulated", "exact"), 
+	dist = FALSE, Nsim = 10000)
 }
 \arguments{
   	\item{\dots}{ 
-		Either several lists \eqn{L_1,\ldots,L_M}{L.1,\ldots,L.M}, each
-		of two equal length vectors \eqn{A_i}{A.i} and
-		\eqn{B_i}{B.i}, \eqn{i=1,\ldots,M}, of counts \eqn{\ge 0}, 
-		where the common length \eqn{t_i}{t.i} of \eqn{A_i}{A.i} and
-		\eqn{B_i}{B.i} may vary from list to list
+		Either several lists \eqn{L_1,\ldots,L_M}, each
+		of two equal length vectors \eqn{A_i} and
+		\eqn{B_i}, \eqn{i=1,\ldots,M}, of counts \eqn{\ge 0}, 
+		where the common length \eqn{t_i} of \eqn{A_i} and
+		\eqn{B_i} may vary from list to list
 
 		or a list of \code{M} such lists
 	}
     \item{method}{= \code{c("asymptotic","simulated","exact")}, where
 
 		\code{"asymptotic"} uses only an asymptotic chi-square approximation 
-		with \eqn{(t_1-1)+\ldots+(t_M-1)}{(t.1-1)+\ldots+(t.M-1)} degrees of freedom
+		with \eqn{(t_1-1)+\ldots+(t_M-1)} degrees of freedom
 		to approximate the \eqn{P}-value, This calculation is always done.
 
 		\code{"simulated"} uses \code{Nsim} simulated counts for the two vectors
-		\eqn{A_i}{A.i} and \eqn{B_i}{B.i} in list \eqn{L_i}{L.i}, 
-		with the observed marginal totals, \eqn{m_i=\sum A_i}{m.i=\sum A.i}, 
-		\eqn{n_i = \sum B_i}{n.i=\sum B.i}, \eqn{d_i = A_i+B_i}{d.i=A.i+B.i}. 
+		\eqn{A_i} and \eqn{B_i} in list \eqn{L_i}, 
+		with the observed marginal totals, \eqn{m_i=\sum A_i}, 
+		\eqn{n_i = \sum B_i}, \eqn{d_i = A_i+B_i}. 
 		It does this independently from list to list using the same \code{Nsim} each time, 
 		adding the resulting Kruskal-Wallis criteria across lists
 		to get \code{Nsim} such summed values to estimate the \eqn{P}-value.
 
-		\code{"exact"} enumerates all counts for \eqn{A_i}{A.i} and \eqn{B_i}{B.i} with 
+		\code{"exact"} enumerates all counts for \eqn{A_i} and \eqn{B_i} with 
 		the respective observed marginal totals to get an exact distribution for each list. 
 		These distributions are then convolved to obtain the \eqn{P}-value.
 		It is used only when \code{Nsim} is at least as large as the product across blocks
-		of the number \code{choose(m+t-1,t-1)} of full enumerations per block.
+		of the number \code{choose(m+t-1,t-1)} of full enumerations per block, where
+		\eqn{t = t_1,\ldots, t_M}.
 		Otherwise, \code{method} reverts to \code{"simulated"} using the given \code{Nsim}.
     }
 	\item{dist}{\code{FALSE} (default) or \code{TRUE}. If \code{TRUE}, the 
 		simulated or fully enumerated null distribution \code{null.dist} is returned
 		for the Kruskal-Wallis test statistic. Otherwise \code{null.dist = NULL} is returned.
 	}
-	\item{Nsim}{\code{=10000} (default), number of simulated \eqn{A_i}{A.i} splits to use per block.
+	\item{Nsim}{\code{=10000} (default), number of simulated \eqn{A_i} splits to use per block.
 		It is only used when \code{method = "simulated"},
 		or when \code{method = "exact"} reverts to \code{method = "simulated"}, as previously explained.
 	}

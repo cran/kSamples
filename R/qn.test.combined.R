@@ -1,5 +1,5 @@
 qn.test.combined <-
-function (...,test = c("KW","vdW","NS"),
+function (...,data = NULL, test = c("KW","vdW","NS"),
 	method=c("asymptotic","simulated","exact"),
 	dist=FALSE,Nsim=10000) 
 {
@@ -38,7 +38,16 @@ function (...,test = c("KW","vdW","NS"),
 #        K.i sample vectors of respective sizes n.i[1], ..., n.i[K.i] 
 #        (n.i[j] > 4 is recommended)
 #
-#        or a single list of such lists.
+#        or a single list of such lists
+#
+#        or a data frame with first column representing the responses y,
+#           the second column a factor g the levels of which are used to 
+#           indicate the samples within each block, and the third column 
+#           a factor b indicating the block
+#
+#        or a formula y ~ g | b with y, g, b as in the previous situation
+#
+#        or just the three vectors y, g, b in this order with same meaning.
 #
 # 		test:	specifies the ranks scores to be used, averaging the scores
 #               of tied observations. 
@@ -176,47 +185,21 @@ x <- numeric(n)
 					x=as.double(x),n=as.integer(n))
 out$x
 }
-na.remove <- function(x){
-#
-# This function removes NAs from a list and counts the total 
-# number of NAs in na.total.
-# Returned is a list with the cleaned list x.new and with 
-# the count na.total of NAs.
-#
-	na.status <- lapply(x,is.na) # changed sapply to lapply
-	k <- length(x)
-	x.new <- list()
-	na.total <- 0
-	for( i in 1:k ){
-		x.new[[i]] <- x[[i]][!na.status[[i]]]
-		na.total <- na.total + sum(na.status[[i]])
-	}
-	list(x.new=x.new,na.total=na.total)
-}
-# end of na.remove
+
 
 # the following converts individual data sets into a list of such,
-# if not already in this form.
-if(length(list(...)) == 1) {
-	if(is.list(...) & is.list(...[[1]])){
-        	data.sets <- list(...)[[1]]}else{
-       		stop("you need more than 1 block of data sets\n")
-	}
-   	}else {
-        	data.sets <- list(...)
-	} 
+# if not already in this form. It drops blocks (sublist) with at
+# most one sample in it.
+data.sets <- io2(...,data = data)
+data.sets <- test.list(data.sets)
 # end of data.sets list conversion
 test <- match.arg(test)
 method <- match.arg(method)
 n.sizes <- NULL
 M <- length(data.sets) # number of data sets
-if(M < 2) 
-	stop("To combine test results you must have at least two data sets.")
 
 n.data <- sapply(data.sets, length) 
 		# gets vector of number of samples in each component of data.sets
-if(any(n.data <= 1)) 
-	stop("One or more of the data sets consists of less than 2 samples.")
 n.samples <- list() # intended to contain vectors of sample sizes for 
                     # for each respective data set.
 na.t <- 0 # intended to tally total of NA cases

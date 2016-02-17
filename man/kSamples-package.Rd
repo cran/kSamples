@@ -9,8 +9,8 @@ their Combinations over Blocks
 \description{
 The k-sample Anderson-Darling, Kruskal-Wallis, normal score and van der Waerden score tests
 are used to test the hypothesis that k samples of 
-sizes \eqn{n_1, \ldots, n_k}{n.1,\ldots, n.k}
-come from a common continuous distribution that is otherwise unspecified. They are rank tests.
+sizes \eqn{n_1, \ldots, n_k}
+come from a common continuous distribution \eqn{F} that is otherwise unspecified. They are rank tests.
 Average rank scores are used in case of ties. 
 While \code{\link{ad.test}} is consistent against all alternatives, \code{\link{qn.test}}
 tends to be sensitive mainly to shifts between samples.
@@ -21,12 +21,16 @@ used to simultaneously test such hypotheses across several blocks of samples.
 The hypothesized common distributions and the number k of samples for each block of samples
 may vary from block to block. 
 
+The Jonckheere-Terpstra test addresses the same hypothesis as above but is sensitive to increasing
+alternatives (stochastic ordering).
+
 Also treated is the analysis of 2 x t contingency tables
 using the Kruskal-Wallis criterion and its extension to blocks.
  
-Steel's simultaneous comparison of a common control sample with \eqn{s} treatment samples
-using pairwise Wilcoxon tests is provided, and also 
-the simultaneoaus confidence bounds of treatment shift effects resulting from the inversion of these tests.
+Steel's simultaneous comparison test of a common control sample with \eqn{s=k-1} treatment samples
+using pairwise Wilcoxon tests for each control/treatment pair is provided, and also 
+the simultaneous confidence bounds of treatment shift effects resulting from the inversion of these tests
+when sampling from continuous populations.
 
 Distributional aspects are handled asymptotically in all cases, and by choice also
 via simulation or exact enumeration.
@@ -35,15 +39,15 @@ are only possible for small sample sizes and only when few samples are involved.
 calculations can be done with or without ties in the pooled samples, based on a recursively extended
 version of Algorithm C (Chase's sequence) in Knuth (2011), which allows the 
 enumeration of all possible splits of the pooled data into samples of
-sizes of \eqn{n_1, \ldots, n_k}{n.1,\ldots, n.k}, as appropriate under treatment randomization
+sizes of \eqn{n_1, \ldots, n_k}, as appropriate under treatment randomization
 or random sampling, when viewing tests conditionally given the observed tie pattern.
 }
 \details{
 \tabular{ll}{
 Package: \tab kSamples\cr
 Type: \tab Package\cr
-Version: \tab 1.0.1\cr
-Date: \tab 2015-02-08\cr
+Version: \tab 1.2-3\cr
+Date: \tab 2016-02-16\cr
 License: \tab GPL version 2 or newer\cr
 LazyLoad: \tab yes\cr
 }

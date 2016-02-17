@@ -1,5 +1,5 @@
 qn.test <-
-function (...,
+function (..., data = NULL,
 		test = c("KW","vdW","NS"),
 		method=c("asymptotic","simulated","exact"),
 		dist=FALSE,Nsim=10000) 
@@ -23,8 +23,15 @@ function (...,
 #
 # 
 # Inputs:
-#       	...:	can either be a sequence of k (>1) sample vectors 
-#					or a list of k (>1) sample vectors.
+#       	...:	can either be a sequence of k (>1) sample vectors,
+#
+#				or a list of k (>1) sample vectors,
+#
+#                               or y, g, where y contains the concatenated
+#				samples and g is a factor which by its levels
+#				identifies the samples in y,
+#
+#                               or a formula y ~ g with y and g as in previous case.
 #
 #           test:	specifies the ranks scores to be used, averaging the scores
 #                   of tied observations. 
@@ -127,23 +134,7 @@ function (...,
 # Fritz Scholz, August 2012
 #
 #################################################################################
-na.remove <- function(x){
-#
-# This function removes NAs from a list and counts the total 
-# number of NAs in na.total.
-# Returned is a list with the cleaned list x.new and with 
-# the count na.total of NAs.
-#
-	na.status <- lapply(x,is.na) # changed sapply to lapply
-	k <- length(x)
-	x.new <- list()
-	na.total <- 0
-	for( i in 1:k ){
-		x.new[[i]] <- x[[i]][!na.status[[i]]]
-		na.total <- na.total + sum(na.status[[i]])
-	}
-	list(x.new=x.new,na.total=na.total)
-}
+
 ave.score <- function(z, scores){
 # This function takes a data vector z and a vector scores
 # of same length and returns a vector av.scores of scores 
@@ -160,104 +151,102 @@ ave.score <- function(z, scores){
    }
   av.scores
 }
-if (nargs() >= 1 & is.list(list(...)[[1]])) {
-       	samples <- list(...)[[1]]
-}else{
-        samples <- list(...)
-}
-test <- match.arg(test)
-method <- match.arg(method)
-out <- na.remove(samples)
-na.t <- out$na.total
-if( na.t > 1) cat(paste("\n",na.t," NAs were removed!\n\n"))
-if( na.t == 1) cat(paste("\n",na.t," NA was removed!\n\n"))
-samples <- out$x.new
-k <- length(samples)
-if (k < 2) stop("Must have at least two samples.")
-ns <- sapply(samples, length)
-n <- sum(ns)
-if (any(ns == 0)) stop("One or more samples have no observations.")
-x <- numeric(n)
-istart <- 0
-for (i in 1:k){
-	x[istart+(1:ns[i])] <- samples[[i]]
-	istart <- istart + ns[i]		
-}
-if(test == "KW"){ scores.vec <- 1:n }
-if (test == "NS") {
-#	if (!exists("normOrder")) library(SuppDists)
-	scores.vec <- normOrder(n)
-}
-if(test == "vdW") {
-	scores.vec <- qnorm((1:n)/(n + 1))
-}  
-QNobs <- 0
-pval <- 0
-rx <- ave.score(x,scores.vec)
-svar <- var(rx)
-smean <- mean(rx)
-L <- length(unique(rx))
-ncomb <- choose(n,ns[1])
-np <- n-ns[1]
-if(k>2){
-	for(i in 2:(k-1)){
-		ncomb <- ncomb * choose(np,ns[i])
-        	np <- np-ns[i]
+	samples <- io(...,data = data)
+	test <- match.arg(test)
+	method <- match.arg(method)
+	out <- na.remove(samples)
+	na.t <- out$na.total
+	if( na.t > 1) print(paste("\n",na.t," NAs were removed!\n\n"))
+	if( na.t == 1) print(paste("\n",na.t," NA was removed!\n\n"))
+	samples <- out$x.new
+	k <- length(samples)
+	if (k < 2) stop("Must have at least two samples.")
+	ns <- sapply(samples, length)
+	n <- sum(ns)
+	if (any(ns == 0)) stop("One or more samples have no observations.")
+	x <- unlist(samples)
+	if(test == "KW"){ scores.vec <- 1:n }
+	if (test == "NS") {
+		# if (!exists("normOrder")) library(SuppDists)
+		scores.vec <- normOrder(n)
 	}
-}
-useExact <- FALSE
-if(method == "asymptotic"){
-	Nsim <- 1
-	dist <- FALSE
-}
-nrow <- Nsim
-if(method == "exact" & Nsim < ncomb) method <- "simulated"
-if(method == "exact") useExact <- TRUE
-if(useExact){nrow <- ncomb}
-if(dist==T){
-	QNvec <- numeric(nrow)
-}else{
-    	QNvec <- NULL
-}
-out <- .C("QNtest", pval=as.double(pval),
+	if(test == "vdW") {
+		scores.vec <- qnorm((1:n)/(n + 1))
+	}  
+	QNobs <- 0
+	pval <- 0
+	rx <- ave.score(x,scores.vec)
+	svar <- var(rx)
+	smean <- mean(rx)
+	L <- length(unique(rx))
+	if(dist == TRUE) Nsim <- min(Nsim,1e8) 
+	ncomb <- 1
+	if( method == "exact"){
+		np <- n
+    		for(i in 1:(k-1)){
+			ncomb <- ncomb * choose(np,ns[i])
+        		np <- np-ns[i]
+		}
+	# it is possible that ncomb overflows to Inf
+		if(!(ncomb < Inf)) stop('ncomb = Inf, method = "exact" not possible\n')
+	}
+
+	if( method == "exact" & Nsim < ncomb) {
+		method <- "simulated"
+	}
+	if( method == "exact" & dist == TRUE ) nrow <- ncomb
+   	if( method == "simulated" & dist == TRUE ) nrow <- Nsim
+
+	if( method == "simulated" ) ncomb <- 1 # don't need ncomb anymore
+	if(method == "asymptotic"){
+		Nsim <- 1
+		dist <- FALSE
+	}
+	useExact <- FALSE
+	if(method == "exact") useExact <- TRUE
+	if(dist==T){
+		QNvec <- numeric(nrow)
+	}else{
+    		QNvec <- 0
+	}	
+	out <- .C("QNtest", pval=as.double(pval),
 		Nsim=as.integer(Nsim), k=as.integer(k), 
 		rx=as.double(rx), ns=as.integer(ns), 
             	useExact=as.integer(useExact),
 		getQNdist=as.integer(dist),
-		ncomb=as.double(nrow),QNobs=as.double(QNobs),
+		ncomb=as.double(ncomb),QNobs=as.double(QNobs),
 		QNvec = as.double(QNvec))
-QNobs <- (out$QNobs - n*smean^2)/svar
-pval <- out$pval
-if(dist){
-	QNvec <- round((out$QNvec- n*smean^2)/svar,8)
-}
-pval.asympt <- 1-pchisq(QNobs,k-1)
-if(method=="asymptotic"){
-	qn <- c(QNobs,pval.asympt)
-}else{
-	qn <- c(QNobs,pval.asympt,pval)
-}
-if(method=="asymptotic"){
-	names(qn) <- c("test statistic"," asympt. P-value")
-}
-if(method=="exact"){
-	names(qn) <- c("test statistic"," asympt. P-value","exact P-Value")
-}
-if(method=="simulated"){
-	names(qn) <- c("test statistic"," asympt. P-value","sim. P-Value")
-}
-warning <- FALSE
-if(min(ns) < 5) warning <- TRUE
-if(dist == FALSE) null.dist <- NULL
-if(test == "vdW") test.name <- "van der Waerden scores"
-if(test == "NS") test.name <- "normal scores"
-if(test == "KW") test.name <- "Kruskal-Wallis"
-object <- list(test.name = test.name,
+	QNobs <- (out$QNobs - n*smean^2)/svar
+	pval <- out$pval
+	if(dist){
+		QNvec <- round((out$QNvec- n*smean^2)/svar,8)
+	}
+	pval.asympt <- 1-pchisq(QNobs,k-1)
+	if(method=="asymptotic"){
+		qn <- c(QNobs,pval.asympt)
+	}else{
+		qn <- c(QNobs,pval.asympt,pval)
+	}
+	if(method=="asymptotic"){
+		names(qn) <- c("test statistic"," asympt. P-value")
+	}
+	if(method=="exact"){
+		names(qn) <- c("test statistic"," asympt. P-value","exact P-Value")
+	}
+	if(method=="simulated"){
+		names(qn) <- c("test statistic"," asympt. P-value","sim. P-Value")
+	}
+	warning <- FALSE
+	if(min(ns) < 5) warning <- TRUE
+	if(dist == FALSE | method == "asymptotic") QNvec <- NULL
+	if(test == "vdW") test.name <- "van der Waerden scores"
+	if(test == "NS") test.name <- "normal scores"
+	if(test == "KW") test.name <- "Kruskal-Wallis"
+	object <- list(test.name = test.name,
 		k = k, ns = ns, N = n, n.ties = n - L,
 		qn = qn, warning = warning, null.dist = QNvec,
 		method=method, Nsim=Nsim)
-    class(object) <- "kSamples"
-    object
-
+    	class(object) <- "kSamples"
+    	object
 }
 

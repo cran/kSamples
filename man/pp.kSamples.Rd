@@ -24,9 +24,14 @@ pp.kSamples(x)
 
 \code{\link{qn.test.combined}} Combined \eqn{QN} rank scores tests.
 
-\code{\link{contingency2xt}} test for \eqn{2\times t} contingency table.
+\code{\link{contingency2xt}} test for \eqn{2 * t} contingency table.
 
-\code{\link{contingency2xt.comb}} test for the combination of \eqn{2\times t} contingency tables.
+\code{\link{contingency2xt.comb}} test for the combination of \eqn{2 * t} contingency tables.
+
+\code{\link{jt.test}} Jonckheere-Terpstra test.
+
+\code{\link{Steel.test}} Steel test. This will work only for alternative = "greater" or "two-sided".
+The approximation quality for "less" is the same as for "greater".
 
 The command \code{pp.kSamples(x)} for an object of class \code{kSamples}
 will only produce a plot when the object \code{x} contains 
@@ -43,6 +48,8 @@ a sense of the asymptotic distribution accuracy.
 
 \code{\link{contingency2xt}},
 \code{\link{contingency2xt.comb}}
+\code{\link{jt.test}}
+\code{\link{Steel.test}}
 }
 
 \examples{

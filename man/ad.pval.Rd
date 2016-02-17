@@ -36,19 +36,19 @@ Using \code{ad.test},
 \eqn{n_i=500}{n.i=500}, \eqn{i=1,\ldots,k} were run for \eqn{k=2,3,4,5,7} (\eqn{k=2} was done twice).
 These values of \eqn{k} correspond to degrees of freedom
 \eqn{m=k-1=1,2,3,4,6} in the asymptotic distribution. The random variable described by this 
-distribution is denoted by \eqn{T_m}{T.m}.
-The actual variances (for \eqn{n_i=500}{n.i=500}) agreed fairly well with the asymptotic variances.
+distribution is denoted by \eqn{T_m}.
+The actual variances (for \eqn{n_i=500}) agreed fairly well with the asymptotic variances.
 
 Using the convolution nature of the asymptotic distribution, the performed simulations
 were exploited to result in an effective simulation of 2 million cases, except for 
 \eqn{k=11}, i.e., \eqn{m=k-1=10}, for which the asymptotic distribution of 
-\eqn{T_{10}}{T.10}
+\eqn{T_{10}}
 was approximated by the sum of the \eqn{AD} statistics for \eqn{k=7} and \eqn{k=5}, 
 for just the 1 million cases run for each \eqn{k}. 
 
 The interpolation of tail 
 probabilities \eqn{P}
-for any desired \eqn{k} is done in two stages. First, a spline in \eqn{1/\sqrt m} is
+for any desired \eqn{k} is done in two stages. First, a spline in \eqn{1/\sqrt{m}}{1/sqrt(m)} is
 fitted to each of the 36 quantiles obtained for \eqn{m=1,2,3,4,6,8,10,\infty} to obtain 
 the corresponding interpolated quantiles for the \eqn{m} in question. 
 
@@ -72,7 +72,7 @@ Scholz, F. W. and Stephens, M. A. (1987), K-sample Anderson-Darling Tests,
 
 
 \seealso{
-\code{\link{ad.test}}
+\code{\link{ad.test}},
 \code{\link{ad.test.combined}}
 }
 

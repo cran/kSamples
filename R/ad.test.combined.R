@@ -1,5 +1,6 @@
 ad.test.combined <-
-function (...,method=c("asymptotic","simulated","exact"),dist=FALSE,Nsim=10000) 
+function (..., data = NULL, method = c("asymptotic","simulated","exact"),
+	dist = FALSE, Nsim = 10000) 
 {
 #############################################################################
 # This function ad.test.combined combines several Anderson-Darling 
@@ -37,7 +38,23 @@ function (...,method=c("asymptotic","simulated","exact"),dist=FALSE,Nsim=10000)
 #        K.i sample vectors of respective sizes n.i[1], ..., n.i[K.i] 
 #        (n.i[j] > 4 is recommended)
 #
-#        or a single list of such lists.
+#        or a single list of such lists
+#
+#        or a data frame with 3 columns, the first column representing 
+#	 the responses y, the second column a factor g the levels of 
+#  	 which are used to indicate the samples within each block, and 
+#	 the third column a factor b indicating the block
+#
+#        or a formula y ~ g | b with y, g, b as in the previous situation,
+#        where y, g, b may be variable names in a provided data frame, say dat,
+#	 supplied via data = dat,
+#
+#        or just the three vectors y, g, b in this order with same meaning.
+#
+# data 
+#  	an optional data frame containing the variable names used in formula input, 
+#       default is NULL, in which case the used variables must exist in the calling
+#       environment.
 #
 # method 
 #       can take one of three values "asymptotic", "simulated",
@@ -65,7 +82,7 @@ function (...,method=c("asymptotic","simulated","exact"),dist=FALSE,Nsim=10000)
 #  		we are limited by the object size in R. In simulations the length
 #       of the simulated vector of AD.comb is only Nsim and is manageable.
 #
-#       dist
+# dist
 #       takes values FALSE (default) or TRUE, where TRUE enables the 
 #		return of the simulated or exact vectors of generated values
 #       for both versions of AD.comb.
@@ -182,46 +199,22 @@ x <- numeric(n)
 					x=as.double(x),n=as.integer(n))
 out$x
 }
-na.remove <- function(x){
-#
-# This function removes NAs from a list and counts the total 
-# number of NAs in na.total.
-# Returned is a list with the cleaned list x.new and with 
-# the count na.total of NAs.
-#
-	na.status <- lapply(x,is.na) # changed sapply to lapply
-	k <- length(x)
-	x.new <- list()
-	na.total <- 0
-	for( i in 1:k ){
-		x.new[[i]] <- x[[i]][!na.status[[i]]]
-		na.total <- na.total + sum(na.status[[i]])
-	}
-	list(x.new=x.new,na.total=na.total)
-}
-# end of na.remove
+
 
 # the following converts individual data sets into a list of such,
 # if not already in this form.
-if(length(list(...)) == 1) {
-	if(is.list(...) & is.list(...[[1]])){
-        	data.sets <- list(...)[[1]]}else{
-       		stop("you need more than 1 block of data sets\n")
-	}
-   	}else {
-        	data.sets <- list(...)
-	} 
+
+data.sets <- io2(...,data=data)
+data.sets <- test.list(data.sets)
+
 # end of data.sets list conversion
 
 method <- match.arg(method)
 n.sizes <- NULL
-M <- length(data.sets) # number of data sets
-if(M < 2)  stop("To combine test results you must have at least two data sets.")
+M <- length(data.sets) # number of data sets (blocks)
 
 n.data <- sapply(data.sets, length) 
 		# gets vector of number of samples in each component of data.sets
-if(any(n.data <= 1)) 
-	stop("One or more of the data sets consists of less than 2 samples.")
 n.samples <- list() # intended to contain vectors of sample sizes for 
                     # for each respective data set.
 na.t <- 0 # intended to tally total of NA cases
@@ -243,7 +236,7 @@ for(i in 1:M){
                        "has no observations"))
 	n.samples[[i]] <- n.sample 
 	N <- sum(n.sample) # total observations in i-th data set
-    k <- length(n.sample) # number of samples in i-th data set
+    	k <- length(n.sample) # number of samples in i-th data set
 
     # updating ncomb
    	ncomb <- ncomb * choose(N,n.sample[1])
@@ -252,6 +245,8 @@ for(i in 1:M){
 		ncomb <- ncomb * choose(N,n.sample[j])
 	} # end of ncomb update for data set i
 }
+Nsim <- min(Nsim,1e7) 
+
 if(ncomb > Nsim & method == "exact") method <- "simulated"	
 
 if( na.t > 1) cat(paste("\n",na.t," NAs were removed!\n\n"))
@@ -259,6 +254,7 @@ if( na.t == 1) cat(paste("\n",na.t," NA was removed!\n\n"))
 
 warning <- min(n.sizes) < 5 # set warning flag for caution on
                             # trusting asymptotic p-values
+
 
 # Initializing output objects
 AD <- 0
@@ -275,7 +271,7 @@ if(method == "asymptotic"){dist0 <- FALSE}else{dist0 <- TRUE}
 # convolution distribution of the combined AD statistic versions
 for(i in 1:M){
 	out <- ad.test(data.sets[[i]],method=method,dist=dist0,Nsim=Nsim)
-	if(dist0==T){
+	if(dist0==TRUE){
 	    if(i == 1){
 			dist1 <- out$null.dist1
 			dist2 <- out$null.dist2
@@ -302,7 +298,7 @@ for(i in 1:M){
 AD <- as.numeric(AD)
 # get exact or simulated P-value
 if(dist0==T){
-    nrow <- length(dist1)
+    	nrow <- length(dist1)
 	ad.pval1.dist <- sum(dist1 >= AD[1])/nrow
 	ad.pval2.dist <- sum(dist2 >= AD[2])/nrow
 }

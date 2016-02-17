@@ -10,27 +10,40 @@ each block come from a common unspecified distribution, while the common
 distributions may vary from block to block.  
 }
 \usage{
-qn.test.combined(\dots, test = c("KW", "vdW", "NS"),
-method = c("asymptotic", "simulated", "exact"),
-dist = FALSE, Nsim = 10000)
+qn.test.combined(\dots, data = NULL, test = c("KW", "vdW", "NS"),
+	method = c("asymptotic", "simulated", "exact"),
+	dist = FALSE, Nsim = 10000)
 }
 \arguments{
   	\item{\dots}{
-		Either several lists, say \eqn{L_1, \ldots , L_M}{L.1, \ldots, L.M}, 
-		where list \eqn{L_i}{L.i} contains \eqn{k_i>1}{k.i>1} sample vectors of respective 
-		sizes \eqn{n_{i1}, \ldots, n_{ik_i}}{n.i1, \ldots, n.ik.i}, 
-		where \eqn{n_{ij} > 4}{n.ij > 4} is recommended
-		for reasonable asymptotic \eqn{P}-value calculation.
+		Either a sequence of several lists, say \eqn{L_1, \ldots, L_M} (\eqn{M > 1})
+		where list \eqn{L_i} contains \eqn{k_i > 1}  sample vectors of respective 
+		sizes \eqn{n_{i1}, \ldots, n_{ik_i}}, 
+		where \eqn{n_{ij} > 4} is recommended
+		for reasonable asymptotic \eqn{P}-value calculation. 
+		\eqn{N_i=n_{i1}+\ldots+n_{ik_i}}
+		is the pooled sample size for block \eqn{i},
 
-		or a list of such lists. 
+		or a list of such lists,
+
+		or a formula, like y ~ g | b, where y is a numeric response vector,
+		g is a factor with levels indicating different treatments and
+		b is a factor indicating different blocks; y, g, b have same length. 
+		y is split separately for each block level into separate samples 
+		according to the g levels. The same g level may occur in different 
+		blocks. The variable names may correspond to variables in an optionally 
+		supplied data frame via the data = argument.
 	}
+    	\item{data}{= an optional data frame providing the variables in formula input
+		}
 	\item{test}{= \code{c("KW", "vdW", "NS")}, 
 
 		where \code{"KW"} uses scores \code{1:N} (Kruskal-Wallis test)
 
 		\code{"vdW"} uses van der Waerden scores, \code{qnorm( (1:N) / (N+1) )}
 
-		\code{"NS"} uses normal scores, i.e., expected standard normal order statistics,
+		\code{"NS"} uses normal scores, i.e., expected values of 
+		standard normal order statistics,
 		invoking function \code{normOrder} of \code{package SuppDists}
 
 		For the above scores \eqn{N} changes from block to block and represents the total 
@@ -47,21 +60,19 @@ dist = FALSE, Nsim = 10000)
 		combined values, and compares these with the observed combined value to 
 		get the estimated \eqn{P}-value.
 
-		\code{"exact"} uses full enumeration of all sample splits within each block
-		and obtains the resulting test statistics. The test statistic vectors
-		for each block are convolved (adding each component against each component, as
-		in the R \code{outer(x,y,"+")} command, to get the convolution enumeration
-		for the combined test statistic), "adding" one block at a time. This will
-		be possible only for small problems, and is attempted only when \code{Nsim}
-		is at least the length of the final distribution vector, i.e., 
-		\deqn{\frac{N_1!}{n_{11}!\ldots n_{1k_1}!}\times\ldots\times \frac{N_M!}{n_{M1}!\ldots n_{Mk_M}!}}{%
-N.1! / (n.11! * \ldots * n.1k.1!) ] * \ldots * 
-N.M! / (n.M1! * \ldots * n.Mk.M!)}
-		were \eqn{N_i = n_{i1}+\ldots+n_{ik_i}}{%
-N.i = n.i1+\ldots+n.ik.i} is the sample size of the pooled samples for the 
-i-th block. Otherwise, 
-		\code{method} reverts to \code{"simulated"} using the given \code{Nsim}.
-    }
+		\code{"exact"} uses full enumeration of the test statistic value 
+		for all sample splits of the pooled samples within each block.
+		The test statistic vectors for each block are added 
+		(each component against each component, as in the R \code{outer(x,y,} \code{"+")} command) 
+		to get the convolution enumeration for the combined test statistic.
+		This "addition" is done one block at a time. 
+		It is possible only for small problems, and is attempted only when \code{Nsim}
+		is at least the (conservatively maximal) length 
+		\deqn{\frac{N_1!}{n_{11}!\ldots n_{1k_1}!}\times\ldots\times \frac{N_M!}{n_{M1}!\ldots n_{Mk_M}!}}
+		of the final distribution vector, were \eqn{N_i = n_{i1}+\ldots+n_{ik_i}} 
+		is the sample size of the pooled samples for the i-th block. Otherwise, it reverts to the 
+		simulation method using the provided \code{Nsim}.
+	}
 	\item{dist}{\code{FALSE} (default) or \code{TRUE}. If \code{TRUE}, the 
 		simulated or fully enumerated convolution vector \code{null.dist} is returned for the 
 		\eqn{QN} test statistic. 
@@ -149,25 +160,21 @@ These tests are useful in analyzing treatment effects of shift nature in randomi
 ## Create two lists of sample vectors.
 x1 <- list( c(1, 3, 2, 5, 7), c(2, 8, 1, 6, 9, 4), c(12, 5, 7, 9, 11) )
 x2 <- list( c(51, 43, 31, 53, 21, 75), c(23, 45, 61, 17, 60) )
+# and a corresponding data frame datx1x2
+x1x2 <- c(unlist(x1),unlist(x2))
+gx1x2 <- as.factor(c(rep(1,5),rep(2,6),rep(3,5),rep(1,6),rep(2,5)))
+bx1x2 <- as.factor(c(rep(1,16),rep(2,11)))
+datx1x2 <- data.frame(A = x1x2, G = gx1x2, B = bx1x2)
 
 ## Run qn.test.combined.
 set.seed(2627)
-qn.combined.out <- qn.test.combined(x1, x2, test = "KW",
-	method = "simulated", Nsim = 1000) 
-# or qn.combined out <- qn.test.combined(list(x1, x2), 
-#      test = "KW", method = "simulated", Nsim = 1000)
-
-## Examine list objects in qn.combined.out.
-names(qn.combined.out)
-
-## Extract matrix components qn.list and qn.c
-qn.combined.out$qn.list
-qn.combined.out$qn.c
-
-
-## Fully formatted output 
-qn.combined.out
+qn.test.combined(x1, x2, method = "simulated", Nsim = 1000) 
+# or with same seed
+# qn.test.combined(list(x1, x2), method = "simulated", Nsim = 1000)
+# or qn.test.combined(A~G|B,data=datx1x2,method="simulated",Nsim=1000)
 }
+
+
 
 \keyword{nonparametric}
 \keyword{htest}

@@ -10,20 +10,20 @@ for two responses
 "A" and "B" across t categories.
 }
 \usage{
-contingency2xt(Avec, Bvec, method = 
-	c("asymptotic", "simulated", "exact"), dist = FALSE, 
-	tab0 = TRUE, Nsim = 1e+06)
+contingency2xt(Avec, Bvec, 
+	method = c("asymptotic", "simulated", "exact"), 
+	dist = FALSE, tab0 = TRUE, Nsim = 1e+06)
 }
 \arguments{
   	\item{Avec}{
-		vector of length \eqn{t} giving the counts \eqn{A_1,\ldots, A_t}{A.1,\ldots,A.t} 
+		vector of length \eqn{t} giving the counts \eqn{A_1,\ldots, A_t}
 		for response "A" according to \eqn{t} categories. 
-		\eqn{m = A_1 + \ldots + A_t}{m = A.1 + \ldots + A.t}.
+		\eqn{m = A_1 + \ldots + A_t}.
 	}
   	\item{Bvec}{
-		vector of length \eqn{t} giving the counts \eqn{B_1,\ldots, B_t}{B.1,\ldots,B.t}
+		vector of length \eqn{t} giving the counts \eqn{B_1,\ldots, B_t}
 		for response "B" according to \eqn{t} categories. 
-		\eqn{n = B_1 + \ldots + B_t = N-m}{n = B.1 + \ldots + B.t}.
+		\eqn{n = B_1 + \ldots + B_t = N-m}.
 	}
     \item{method}{= \code{c("asymptotic","simulated","exact")}, where
 
@@ -41,55 +41,40 @@ contingency2xt(Avec, Bvec, method =
 		of full enumerations. 
 		Otherwise, \code{method} reverts to \code{"simulated"} using the given \code{Nsim}.
     }
-	\item{dist}{\code{FALSE} (default) or \code{TRUE}. If \code{TRUE}, the distribution of the
+	\item{dist}{\code{FALSE} (default) or \code{TRUE}. If \code{dist = TRUE}, the distribution of the
 		simulated or fully enumerated Kruskal-Wallis test statistics is
-		returned as \code{null.dist}.
+		returned as \code{null.dist}, if \code{dist = FALSE} the value
+		of \code{null.dist} is \code{NULL}.
+		The coice \code{dist = TRUE} also limits \code{Nsim <- min(Nsim,1e8)}.
 	}
-	\item{tab0}{\code{TRUE} (default) or \code{FALSE}. If \code{TRUE}, the null distribution
+	\item{tab0}{\code{TRUE} (default) or \code{FALSE}. If \code{tab0 = TRUE}, the null distribution
 		is returned in 2 column matrix form when 
 		\code{method = "simulated"}. When \code{tab0 = FALSE} the simulated null distribution 
 		is returned as a vector of all simulated values of the test statistic.
 	}
 	\item{Nsim}{\code{=10000} (default), number of simulated \code{Avec} splits to use.	
 		It is only used when \code{method = "simulated"},
-		or when \code{method = "exact"} reverts to \code{method = "simulated"}, as previously explained.
+		or when \code{method = "exact"} reverts to \code{method =}
+		\code{"simulated"}, as previously explained.
 	}
 
 }
 \details{
 For this data scenario the Kruskal-Wallis criterion is
-\deqn{\bar{K}^\ast = \frac{N(N-1)}{mn}\left(\sum\frac{A_i^2}{d_i}-\frac{m^2}{N}\right)}{%
-KW = [ N(N-1)/(mn) ] * [ \sum (A.i^2)/d.i - (m^2)/N ]}
-with \eqn{d_i=A_i+B_i}{d.i=A.i+B.i}, treating "A" responses
+\deqn{K.star = \frac{N(N-1)}{mn}(\sum\frac{A_i^2}{d_i}-\frac{m^2}{N})}{K.star = 
+N(N-1)/(mn) (\sum A_i^2/d_i-m^2/N)}
+with \eqn{d_i=A_i+B_i}, treating "A" responses
 as 1 and "B" responses as 2, and using midranks as explained in Lehmann (2006), Chapter 5.3.
 
 For small sample sizes exact null distribution
 calculations are possible, based on Algorithm C (Chase's sequence) in Knuth (2011),
 which allows the enumeration of all possible splits of \eqn{m} into counts
-\eqn{A_1,\ldots, A_t}{A.1,\ldots,A.t} such that 
-\eqn{m = A_1 + \ldots + A_t}{m = A.1 + \ldots + A.t},
+\eqn{A_1,\ldots, A_t} such that 
+\eqn{m = A_1 + \ldots + A_t},
 followed by the calculation of the statistic 
-\eqn{\bar{K}^\ast}{KW} for each such split. 
-Simulation of \eqn{A_1,\ldots, A_t}{A.1,\ldots, A.t} uses the probability model (5.35) in Lehmann (2006)
-\deqn{P(A_1=a_1,\ldots,A_t=a_t)=\frac{{d_1\choose a_1}\cdots {d_t\choose a_t}}{{N\choose m}}}{%
-P(A.1=a.1,\ldots,A.t=a.t)=choose(d.1,a.1) * \ldots * choose(d.t,a.t) / choose(N,m)}
-\deqn{
-=\frac{{d_1\choose a_1}{N-d_1\choose m-a_1}}{{N\choose m}}
-\frac{{d_2\choose a_2}{N-d_1-d_2\choose m-a_1-a_2}}{{N-d_1\choose m-a_1}}
-\frac{{d_3\choose a_3}{N-d_1-d_2-d_3\choose m-a_1-a_2-a_3}}{{N-d_1-d_2\choose
- m-a_1-a_2}}
- \ldots
-\frac{{d_t\choose a_t}{N-d_1-d_2-d_3-\dots-d_t\choose m-a_1-a_2-a_3-
-\ldots-a_t}}{{N-d_1-d_2-\ldots-d_{t-1}\choose
- m-a_1-a_2-\ldots-a_{t-1}}}}{%
-= [ choose(d.1,a.1)*choose(N-d.1,m-a.1) / choose(N,m) ]}
-\deqn{}{ *
-[ choose(d.2,a.2)*choose(N-d.1-d.2,m-a.1-a.2) / choose(N-d.1, m-a.1) ] }
-\deqn{}{ *
-[ choose(d.3,a.3)*choose(N-d.1-d.2-d.3,m-a.1-a.2-a.3) / choose(N-d.1-d.2, m-a.1-a.2) ]
-* \ldots 
-}
-to successively generate hypergeometric counts \eqn{A_1,\ldots, A_t}{A.1,\ldots,A.t}.
+\eqn{K.star} for each such split. 
+Simulation of \eqn{A_1,\ldots, A_t} uses the probability model (5.35) in Lehmann (2006)
+to successively generate hypergeometric counts \eqn{A_1,\ldots, A_t}.
 Both these processes, enumeration and simulation, are done in C.
 }
 \value{

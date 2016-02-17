@@ -3,16 +3,17 @@ function (x, ...)
 {
 ######################################################
 #
-# This is a print function for objects of class ksamples,
+# This is a print function for objects of class kSamples,
 # as they are produced by ad.test, kw.test,
 # ad.combined.test, kw.combined.test, contingency2xt,
-# contingency2xt.comb, Steel.test, and SteelConfInt.
+# contingency2xt.comb, Steel.test, SteelConfInt,
+# and JT.test.
 #
-# Fritz Scholz, July 2012
+# Fritz Scholz, August 2015
 #
 #######################################################
 	if(names(x)[2]=="k"){# checking whether the object x 
-                         #came from ad.test or qn.test
+                         #came from ad.test or qn.test of JT.test
 		if(x$test.name=="Steel"){
 			cat("\nSteel Multiple Comparison Wilcoxon Test:\nk treatments against a common control (1st sample)\n\n")
 		}else{
@@ -28,17 +29,24 @@ function (x, ...)
 	        		x$sig))
 	    		cat(paste("\n\nT.AD = (",x$test.name," Criterion - mean)/sigma"))
 		}
-		cat("\n\nNull Hypothesis: All samples come from a common population.\n\n")
+		if(x$test.name != "Jonckheere-Terpstra" ){
+			cat("\n\nNull Hypothesis: All samples come from a common population.\n\n")
+		}else{
+			cat("\n\nNull Hypothesis: All samples come from a common population.\n")
+			cat("Alternative: Samples indicate a positive trend.\n\n")
+		}
     		
     		if(x$method=="simulated") cat(paste("Based on Nsim =",x$Nsim,"simulations\n\n"))
-    		if(x$test.name == "Anderson-Darling" ){print(x$ad)}
-		if(x$test.name == "van der Waerden scores" ) print(x$qn)
-		if(x$test.name == "Kruskal-Wallis" ) print(x$qn)
-		if(x$test.name == "normal scores" ) print(x$qn)
- 
+    		if(x$test.name == "Anderson-Darling" ){print(signif(x$ad,4))}
+		if(x$test.name == "van der Waerden scores" ) print(signif(x$qn,4))
+		if(x$test.name == "Kruskal-Wallis" ) print(signif(x$qn,4))
+		if(x$test.name == "normal scores" ) print(signif(x$qn,4))
+ 		if(x$test.name == "Jonckheere-Terpstra" ){
+			print(signif(x$JT,4))
+		}
 		if (x$warning) {
-        		cat("\n\nWarning: At least one sample size is less than 5.\n")
-			cat("asymptotic p-values may not be very accurate.\n")
+        		cat("\n\nWarning: At least one sample size is less than 5,\n")
+			cat("  asymptotic p-values may not be very accurate.\n")
     		}
     		invisible(x)
 	}
@@ -76,7 +84,7 @@ function (x, ...)
         		if(x$method=="simulated") cat(paste("Based on Nsim =",x$Nsim,"simulations\n\n"))
 	    		for(i in 1:nx){
 				cat(paste("for data set",i,"we get\n"))
-    				print(x$ad.list[[i]])
+    				print(signif(x$ad.list[[i]],4))
             			cat("\n")
     			}
 			cat("Combined Anderson-Darling Criterion: AD.comb =",AD.name,"\n")
@@ -85,7 +93,7 @@ function (x, ...)
 	    		cat("\n")
         		if(x$method=="simulated") cat(paste("Based on Nsim =",x$Nsim,"simulations\n\n"))
 			ad.c <- x$ad.c
-	    		print(ad.c)
+	    		print(signif(ad.c,4))
 		}
 
     		if(x$test.name == "van der Waerden scores" | 
@@ -95,17 +103,17 @@ function (x, ...)
         		if(x$method=="simulated") cat(paste("Based on Nsim =",x$Nsim,"simulations\n\n"))
 	   	 	for(i in 1:nx){
 				cat(paste("for data set",i,"we get\n"))
-    				print(x$qn.list[[i]])
+    				print(signif(x$qn.list[[i]],4))
             			cat("\n")
     			}
 			cat("Combined Criterion: QN.combined =",QN.name,"\n")
 			cat("\n")
         		if(x$method=="simulated") cat(paste("Based on Nsim =",x$Nsim,"simulations\n\n"))
-	    		print(x$qn.c)
+	    		print(signif(x$qn.c,4))
 		}
     		if (x$warning) {
-        		cat("\n\nWarning: At least one sample size is less than 5.\n")
-			cat("        p-values may not be very accurate.\n")
+        		cat("\n\nWarning: At least one sample size is less than 5,\n")
+			cat("  asymptotic p-values may not be very accurate.\n")
     		}
 		cat("\n")
 		invisible(x)
@@ -113,7 +121,7 @@ function (x, ...)
   	if(x$test.name == "2 x t Contingency Table"){
    	 	cat(paste("\n      Kruskal-Wallis Test for 2 x",x$t,"Contingency Table\n\n"))
    		if(x$method=="simulated") cat(paste("      Based on Nsim =", x$Nsim,"simulations\n\n"))
-		print(x$KW.cont)
+		print(signif(x$KW.cont,4))
 		cat("\n")
 		invisible(x)
 	}
@@ -123,7 +131,7 @@ function (x, ...)
 		nx <- length(x$kw.list)
 		for( i in 1:nx){
 				cat(paste("for data set",i,"we get\n"))
-    				print(x$kw.list[[i]])
+    				print(signif(x$kw.list[[i]],4))
             			cat("\n")
 		}
 		if(nx>3) KW.name=paste("KW.1","...",paste("KW.",k,sep=""),sep="+")
@@ -132,12 +140,12 @@ function (x, ...)
 		cat("Combined Criterion: KW.combined =",KW.name,"\n")
 			cat("\n")
         		if(x$method=="simulated") cat(paste("Based on Nsim =",x$Nsim,"simulations\n\n"))
-	    		print(x$kw.c)
+	    		print(signif(x$kw.c,4))
 			cat("\n")
 		invisible(x)
 	}
   	if(x$test.name == "Steel"){
-                print(x$st)
+                print(signif(x$st,4))
 		invisible(x)
 	}
 	if(x$test.name == "Steel.bounds"){
