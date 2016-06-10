@@ -303,11 +303,20 @@ if(dist0==T){
 	ad.pval2.dist <- sum(dist2 >= AD[2])/nrow
 }
 sig.c <- sqrt(sum(sig^2)) # standard deviation of combined AD stats
-tc.obs <- (AD - mu.c)/sig.c # standardized values of AD stats
+if(sig.c >0){
+	tc.obs <- (AD - mu.c)/sig.c # standardized values of AD stats
+	}else{
+	tc.obs <- NA
+}
 
 # get asymptotic P-value
-ad.pval1 <- ad.pval(tc.obs[1], mu.c,1)
-ad.pval2 <- ad.pval(tc.obs[2], mu.c,2)
+if(sig.c >0){
+	ad.pval1 <- ad.pval(tc.obs[1], mu.c,1)
+	ad.pval2 <- ad.pval(tc.obs[2], mu.c,2)
+	}else{
+	ad.pval1 <- 1
+	ad.pval2 <- 1
+}
 
     if(method == "asymptotic"){
 		ad.c <- matrix(c(signif(AD[1],7),signif(tc.obs[1],7),round(ad.pval1,7),

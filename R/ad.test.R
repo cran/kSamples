@@ -207,29 +207,45 @@ function (..., data = NULL,
 	}
 	AkN2 <- out0[[1]][1]
 	AakN2 <- out0[[1]][2]
-	coef.d <- 0
-	coef.c <- 0
-	coef.b <- 0
-	coef.a <- 0
-	H <- sum(1/ns)
-	h <- sum(1/(1:(n - 1)))
-	g <- 0
-	for (i in 1:(n - 2)) {
-	        g <- g + (1/(n - i)) * sum(1/((i + 1):(n - 1)))
-	}
-	coef.a <- (4 * g - 6) * (k - 1) + (10 - 6 * g) * H
-	coef.b <- (2 * g - 4) * k^2 + 8 * h * k + (2 * g - 14 * h - 
-	        4) * H - 8 * h + 4 * g - 6
-	coef.c <- (6 * h + 2 * g - 2) * k^2 + (4 * h - 4 * g + 6) * 
-	        k + (2 * h - 6) * H + 4 * h
-	coef.d <- (2 * h + 6) * k^2 - 4 * h * k
-	sig2 <- (coef.a * n^3 + coef.b * n^2 + coef.c * n + coef.d)/((n - 
+	if(n > 3){
+		coef.d <- 0
+		coef.c <- 0
+		coef.b <- 0
+		coef.a <- 0
+		H <- sum(1/ns)
+		h <- sum(1/(1:(n - 1)))
+		g <- 0
+		for (i in 1:(n - 2)) {
+	        	g <- g + (1/(n - i)) * sum(1/((i + 1):(n - 1)))
+		}
+		coef.a <- (4 * g - 6) * (k - 1) + (10 - 6 * g) * H
+		coef.b <- (2 * g - 4) * k^2 + 8 * h * k + (2 * g - 14 * h - 
+	       	 4) * H - 8 * h + 4 * g - 6
+		coef.c <- (6 * h + 2 * g - 2) * k^2 + (4 * h - 4 * g + 6) * 
+	   	     k + (2 * h - 6) * H + 4 * h
+		coef.d <- (2 * h + 6) * k^2 - 4 * h * k
+		sig2 <- (coef.a * n^3 + coef.b * n^2 + coef.c * n + coef.d)/((n - 
 	        1) * (n - 2) * (n - 3))
-	sig <- sqrt(sig2)
-	TkN <- (AkN2 - (k - 1))/sig
-	TakN <- (AakN2 - (k - 1))/sig
-	pvalTkN <- ad.pval(TkN, k - 1,1)
-	pvalTakN <- ad.pval(TakN, k - 1,2)
+		sig <- sqrt(sig2)
+		TkN <- (AkN2 - (k - 1))/sig
+		TakN <- (AakN2 - (k - 1))/sig
+		pvalTkN <- ad.pval(TkN, k - 1,1)
+		pvalTakN <- ad.pval(TakN, k - 1,2)
+	}
+	if(n == 3 && k == 3 | n == 2){
+		sig <- 0
+		TkN <- NA
+		TakN <- NA
+		pvalTkN <- 1
+		pvalTakN <- 1
+	}
+	if(n == 3 && k == 2){
+		sig <- .3535534
+		TkN <- (AkN2 - (k - 1))/sig
+		TakN <- (AakN2 - (k - 1))/sig
+		pvalTkN <- ad.pval(TkN, k - 1,1)
+		pvalTakN <- ad.pval(TakN, k - 1,2)
+	}
 	warning <- min(ns) < 5
 	if(method=="asymptotic"){
 	     	ad.mat <- matrix(c(signif(AkN2,5), signif(TkN, 5), 

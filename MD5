@@ -1,4 +1,4 @@
-4adbed0fa4d52affdd8cb616c010c954 *DESCRIPTION
+d6a3e71244743495b786f04c6394cce3 *DESCRIPTION
 70046a49024ffcaf25017deff5172b89 *NAMESPACE
 b80c55d93bd6d7ef0c40a19f24be95a6 *R/Harding.R
 7b78edaa8e77a56caf6b28fc1dc2a7b1 *R/Steel.test.R
@@ -6,8 +6,8 @@ b80c55d93bd6d7ef0c40a19f24be95a6 *R/Harding.R
 12c3ff797671dff5384337902e1c57f8 *R/Steelnormal.R
 5c7b051d5a45292f700851ceb55be388 *R/Steelnormal0.R
 afe2c0d61dd08abc93589e3b097a47b3 *R/ad.pval.R
-84f8e410ffbca87a55cc6d467f8df20b *R/ad.test.R
-9253706317116744efe366344f844419 *R/ad.test.combined.R
+c3d739acf01e46b745b7a98b0d1447c5 *R/ad.test.R
+3dd60baf2966dafe3f57cf98a09a332a *R/ad.test.combined.R
 bcf60eb8c0a480a47ed0909b5d2075ca *R/contingency2xt.R
 3c005b348c61668f49c956b24edff597 *R/contingency2xt.comb.R
 5b0a51e9f65b8830e05beb88a7526bf1 *R/conv.R
@@ -36,7 +36,7 @@ f988f4e81c07d15497059adbbb3e35c8 *man/ad.test.Rd
 4aace97e560edc4f6326cfe51b80fd5b *man/conv.Rd
 df2c992645b7cd778312a2b3a8f34445 *man/jt.dist.Rd
 2ec14b8dc13b4c61fe17483882e2bfaa *man/jt.test.Rd
-16139c86038f106c9ec67b37ba7546d2 *man/kSamples-package.Rd
+83a8c9b459d4373fdad7f748bed1ae8a *man/kSamples-package.Rd
 8a6a281da26180cffbbf51102c25ce06 *man/pp.kSamples.Rd
 e471dfe8b5bdc6729ed3343f94b8c558 *man/qn.test.Rd
 7d3b3ef495a17129a7a77469ae5cb7b6 *man/qn.test.combined.Rd
