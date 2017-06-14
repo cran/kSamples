@@ -1,4 +1,4 @@
-useDynLib("kSamples")
+useDynLib("kSamples", .registration = TRUE)
 
 export(ad.pval,ad.test,ad.test.combined,contingency2xt,contingency2xt.comb)
 export(conv,pp.kSamples,qn.test,qn.test.combined)

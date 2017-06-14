@@ -182,7 +182,7 @@ n <- n1*n2
 x <- numeric(n)
  out <- .C("convvec",  x1=as.double(x1), n1=as.integer(n1), 
 					x2=as.double(x2),n2=as.integer(n2), 
-					x=as.double(x),n=as.integer(n))
+					x=as.double(x),n=as.integer(n), PACKAGE = "kSamples")
 out$x
 }
 

@@ -2,7 +2,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include<math.h>
+#include <math.h>
+#include <R_ext/Rdynload.h>
+
 
 /* for random number generator in R */
 #include <R.h>
@@ -188,11 +190,13 @@ void adkTestStat(double *adk, int k, double *x, int *ns){
 	/* fij records the number of observations in the ith 
         sample coinciding with zstar[j], where i = 1, ..., k,
         and j = 1, ..., L                                    */
-	int fij[k*L];
+	/* int fij[k*L]; replaced my next line as per Tomasz Melcer*/
+	int *fij = calloc(k*L, sizeof *fij);
 	/* lvec is an integer vector with length L, 
 		whose jth entry = \sum_{i=1}^{k} f_{ij}, i.e., 
            the multiplicity of zstar[j]                      */
-	int lvec[L];
+	/* int lvec[L]; replaced my next line as per Tomasz Melcer */
+	int *lvec = calloc(L, sizeof *lvec);
 	
 	/* for computation */
 	double mij;
@@ -279,7 +283,8 @@ void adkTestStat(double *adk, int k, double *x, int *ns){
 		free(samples[i]);
 	}
 	free(samples);
-	
+	free(lvec);
+	free(fij);
 }
 
  /* *****************************************
@@ -2483,3 +2488,31 @@ void randPerm(int nsum, double *rx, double *rc, int *ns){
 
 
 }
+
+static const
+R_CMethodDef cMethods[] = {
+	{"convvec", (DL_FUNC) &convvec, 6},
+	{"adkTestStat0", (DL_FUNC) &adkTestStat0, 6},
+	{"adkPVal0", (DL_FUNC) &adkPVal0, 11},
+	{"contingency2xtExact0", (DL_FUNC) &contingency2xtExact0, 6},
+	{"contingency2xtSim0", (DL_FUNC) &contingency2xtSim0, 6},
+	{"convC", (DL_FUNC) &conv, 9},
+	{"Harding0", (DL_FUNC) &Harding0, 5},
+	{"JTtest", (DL_FUNC) &JTtest, 10},
+	{"QNtest", (DL_FUNC) &QNtest, 10},
+	{"Steeltest", (DL_FUNC) &Steeltest, 13},
+	{"SteelConf", (DL_FUNC) &SteelConf, 6},
+	{NULL, NULL, 0}
+};
+
+void R_init_kSamples(DllInfo *info)
+{
+    	R_registerRoutines(info, 
+			cMethods, 
+			NULL, NULL, NULL);
+	R_useDynamicSymbols(info, TRUE);
+
+}
+
+
+

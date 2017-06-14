@@ -9,7 +9,7 @@ freq <- double(L1)
 
 out <- .C("Harding0", k=as.integer(k), L1=as.integer(L1),
 		nn=as.integer(nn), nvec=as.integer(nvec),
-		freq=as.double(freq) )
+		freq=as.double(freq), PACKAGE = "kSamples")
 
 freq <- out$freq
 

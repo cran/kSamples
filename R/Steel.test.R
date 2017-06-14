@@ -260,7 +260,7 @@ out <- .C("Steeltest", pval=as.double(pval),
 		ncomb=as.double(ncomb), alt=as.integer(alt),
                 mu=as.double(mu), tau=as.double(tau),
 		Steelobs=as.double(Steelobs),
-		Steelvec = as.double(Steelvec))
+		Steelvec = as.double(Steelvec), PACKAGE = "kSamples")
 Steelobs <- out$Steelobs
 # changes Steelobs back to make up for earlier sign change
 if(alternative == "less") Steelobs <- -Steelobs

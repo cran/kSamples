@@ -207,7 +207,7 @@ JTmusig <- function (rx,ns)
             		useExact=as.integer(useExact),
 			getJTdist=as.integer(dist),
 			ncomb=as.double(ncomb),JTobs=as.double(JTobs),
-			JTvec = as.double(JTvec))
+			JTvec = as.double(JTvec), PACKAGE = "kSamples")
 	JTobs <- out$JTobs
 	musig <- JTmusig(rx,ns)
 	mu <- musig$mu

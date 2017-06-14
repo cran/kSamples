@@ -215,7 +215,7 @@ ave.score <- function(z, scores){
             	useExact=as.integer(useExact),
 		getQNdist=as.integer(dist),
 		ncomb=as.double(ncomb),QNobs=as.double(QNobs),
-		QNvec = as.double(QNvec))
+		QNvec = as.double(QNvec), PACKAGE = "kSamples")
 	QNobs <- (out$QNobs - n*smean^2)/svar
 	pval <- out$pval
 	if(dist){

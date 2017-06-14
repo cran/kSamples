@@ -190,13 +190,13 @@ function (..., data = NULL,
 	ans <- numeric(2)
         pval <- numeric(2)
 	out0 <- .C("adkTestStat0",ans=as.double(ans),k=as.integer(k),x=as.double(x),
-		ns=as.integer(ns),Z.star=as.double(Z.star),L=as.integer(L))
+		ns=as.integer(ns),Z.star=as.double(Z.star),L=as.integer(L), PACKAGE = "kSamples")
 	if(method != "asymptotic"){	
 		out1 <- .C("adkPVal0",pval=as.double(pval), Nsim=as.integer(Nsim),k=as.integer(k),
 				x=as.double(x),ns=as.integer(ns),
 				zstar=as.double(Z.star),L=as.integer(L),
 				useExact=as.integer(useExact),getA2mat=as.integer(getA2mat),
-				ncomb=as.double(ncomb),a2mat=as.double(a2mat))
+				ncomb=as.double(ncomb),a2mat=as.double(a2mat), PACKAGE= "kSamples")
 	    	pv <- out1$pval
   		if(getA2mat){
     			a2mat <- matrix(out1$a2mat, nrow=nrow, ncol=2, byrow=FALSE, 

@@ -82,7 +82,7 @@ contingency2xt <- function(Avec, Bvec, method=c("asymptotic","simulated","exact"
 					tnum = as.integer(tnum), 
 					ncomb = as.integer(ncomb),
 					getDist = as.integer(dist),
-                                	ans = as.double(ans))
+                                	ans = as.double(ans), PACKAGE = "kSamples")
 				KW.obs <- out$ans[1]
 				KW.obs <- (N * (N - 1) / (m * n)) * (KW.obs - 
                                  	m^2 / N) 

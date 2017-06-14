@@ -274,7 +274,7 @@ if(method != "asymptotic"){
 	out <- .C("SteelConf", Nsim=as.integer(Nsim), k=as.integer(k), 
 		rx=as.double(rx), ns=as.integer(ns), 
             	useExact=as.integer(useExact),
-		MannWhitneyStats = as.double(MannWhitneyStats))
+		MannWhitneyStats = as.double(MannWhitneyStats), PACKAGE = "kSamples")
 
 	MannWhitneyStats <- matrix(out$MannWhitneyStats,ncol=s,byrow=T)
 	maxstandMannWhitneyStats <- apply(matrix(
