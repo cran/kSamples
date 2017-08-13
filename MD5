@@ -1,4 +1,4 @@
-a62d11733f7c574db8d45c560f58fa97 *DESCRIPTION
+b498dcc4bd226dc24cb2f262cdec05fb *DESCRIPTION
 9b158965f51570da03c9d654b76db944 *NAMESPACE
 4c64c183f47e3f41ffe25dc0d88f4e07 *R/Harding.R
 e313845ee478bcaa2382697d214e619e *R/Steel.test.R
@@ -15,7 +15,7 @@ b89e3159e9f25e596605de179a5b7e1d *R/djt.R
 3421ad7dfdcbd2dbf9ce8ae0104d8fb7 *R/io.R
 0bf8da5b7f33dcf9de38808de5f15870 *R/io2.R
 47c9c22b86b2085491326bf0e88150d9 *R/jt.test.R
-963947a43928ddb0cc3950540834bc79 *R/listmake.R
+6ae0d897c7091c9289ccc3017562e01e *R/listmake.R
 d04037e9a5453fb491cae38db3da5751 *R/na.remove.R
 9113dfc48a023decadbba16033220eda *R/pjt.R
 618ba2a7f6ab3b5c037865fc5ccbc50a *R/pp.kSamples.R
@@ -25,7 +25,7 @@ d04037e9a5453fb491cae38db3da5751 *R/na.remove.R
 2f865dcb0654adaa84c6c2c71d40edb7 *R/qn.test.combined.R
 e7c6e7d2aad1c6f7ffa87743f9c5aab5 *R/test.list.R
 ec378c8638881be52ca3784d16101578 *data/ShorelineFireEMS.rda
-e1e3fe3b01aaf69caecabda0b05c5af6 *inst/NEWS.Rd
+f867be2ab83ea941f9dcdb6bd96a2d38 *inst/NEWS.Rd
 496d2c8396d0b721bb7457917957760a *man/ShorelineFireEMS.Rd
 8f19e3fa51d295d13752759965afdb13 *man/Steel.test.Rd
 df3bedb012cc07148434c9ebdf3b085d *man/SteelConfInt.Rd

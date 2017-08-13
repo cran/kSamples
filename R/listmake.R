@@ -5,7 +5,7 @@ data.sets <- lapply(levels(b),
 						gg <- as.factor(as.numeric(unlist(g[b==blv])))
 						lapply(levels(gg),
 							function(glv){
-						     return(y[b == blv & g == glv])
+						     return(y[b == blv & gg == glv])
 							}
 						)
 					}

@@ -1,8 +1,8 @@
 Package: kSamples
 Type: Package
 Title: K-Sample Rank Tests and their Combinations
-Version: 1.2-6
-Date: 2017-06-14
+Version: 1.2-7
+Date: 2017-08-10
 Authors@R: c(person("Fritz", "Scholz",role=c("aut","cre"),email =
         "fscholz@u.washington.edu"), person("Angie", "Zhu", role=c("aut"),
         email= "a.zhu.stat@gmail.com"))
@@ -25,6 +25,6 @@ Description: Compares k samples using the Anderson-Darling test, Kruskal-Wallis 
 License: GPL (>= 2)
 LazyLoad: yes
 NeedsCompilation: yes
-Packaged: 2017-06-14 22:24:18 UTC; fritz
+Packaged: 2017-08-10 23:45:57 UTC; fritz
 Repository: CRAN
-Date/Publication: 2017-06-14 22:52:24 UTC
+Date/Publication: 2017-08-13 05:35:00 UTC
