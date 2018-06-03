@@ -1,6 +1,13 @@
 \name{NEWS}
 \encoding{UTF-8}
 \title{News for Package \pkg{kSamples}}
+\section{Changes in version 1.2-8 (2018-06-02)}{
+	\subsection{Version Synchronization}{
+		\itemize{
+			\item Fixed version synchronization in documentation.
+  		}
+	}
+}
 \section{Changes in version 1.2-7 (2017-08-10)}{
 	\subsection{Bug report}{
 		\itemize{

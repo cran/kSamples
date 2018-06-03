@@ -38,7 +38,7 @@ qn.test(\dots, data = NULL, test = c("KW", "vdW", "NS"),
 		\code{"vdW"} uses van der Waerden scores, \code{qnorm( (1:N) / (N+1) )}
 
 		\code{"NS"} uses normal scores, i.e., expected standard normal order statistics,
-		invoking function \code{normOrder} of \code{package SuppDists}
+		invoking function \code{normOrder} of \code{package SuppDists (>=1.1-9.4)}
 	}
     	\item{method}{= \code{c("asymptotic","simulated","exact")}, where
 

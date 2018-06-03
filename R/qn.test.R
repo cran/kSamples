@@ -167,7 +167,11 @@ ave.score <- function(z, scores){
 	x <- unlist(samples)
 	if(test == "KW"){ scores.vec <- 1:n }
 	if (test == "NS") {
+		if (!requireNamespace("SuppDists", quietly = TRUE)){
 		# if (!exists("normOrder")) library(SuppDists)
+			stop("SuppDists (>= 1.1-9.4) needed for this function to work. Please install it.",
+				call. = FALSE)
+		}
 		scores.vec <- normOrder(n)
 	}
 	if(test == "vdW") {

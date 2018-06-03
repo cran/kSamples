@@ -44,7 +44,7 @@ qn.test.combined(\dots, data = NULL, test = c("KW", "vdW", "NS"),
 
 		\code{"NS"} uses normal scores, i.e., expected values of 
 		standard normal order statistics,
-		invoking function \code{normOrder} of \code{package SuppDists}
+		invoking function \code{normOrder} of \code{package SuppDists (>=1.1-9.4)}
 
 		For the above scores \eqn{N} changes from block to block and represents the total 
 		pooled sample size \eqn{N_i}{N.i} for block \eqn{i}. 

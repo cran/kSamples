@@ -1,4 +1,4 @@
-b498dcc4bd226dc24cb2f262cdec05fb *DESCRIPTION
+be9d226c95ae818bcfb9d44adbcac8e4 *DESCRIPTION
 9b158965f51570da03c9d654b76db944 *NAMESPACE
 4c64c183f47e3f41ffe25dc0d88f4e07 *R/Harding.R
 e313845ee478bcaa2382697d214e619e *R/Steel.test.R
@@ -21,11 +21,11 @@ d04037e9a5453fb491cae38db3da5751 *R/na.remove.R
 618ba2a7f6ab3b5c037865fc5ccbc50a *R/pp.kSamples.R
 948ba6c5987dbbe9c6d555fb31676649 *R/print.kSamples.R
 011a519ff05381c1524a7f311286f9c9 *R/qjt.R
-8d0b2bcf051a9cdf2dfc9847cbd7b513 *R/qn.test.R
+adbaf82af612fc0cf705c8563da21dc3 *R/qn.test.R
 2f865dcb0654adaa84c6c2c71d40edb7 *R/qn.test.combined.R
 e7c6e7d2aad1c6f7ffa87743f9c5aab5 *R/test.list.R
 ec378c8638881be52ca3784d16101578 *data/ShorelineFireEMS.rda
-f867be2ab83ea941f9dcdb6bd96a2d38 *inst/NEWS.Rd
+3acef976c8f61da6adf5a2a295de23a8 *inst/NEWS.Rd
 496d2c8396d0b721bb7457917957760a *man/ShorelineFireEMS.Rd
 8f19e3fa51d295d13752759965afdb13 *man/Steel.test.Rd
 df3bedb012cc07148434c9ebdf3b085d *man/SteelConfInt.Rd
@@ -37,9 +37,9 @@ f988f4e81c07d15497059adbbb3e35c8 *man/ad.test.Rd
 4aace97e560edc4f6326cfe51b80fd5b *man/conv.Rd
 df2c992645b7cd778312a2b3a8f34445 *man/jt.dist.Rd
 2ec14b8dc13b4c61fe17483882e2bfaa *man/jt.test.Rd
-c850f093dac15bddd6d251c8b71ea90f *man/kSamples-package.Rd
+0b25cd1686e279fbce5d2b84aaa82302 *man/kSamples-package.Rd
 8a6a281da26180cffbbf51102c25ce06 *man/pp.kSamples.Rd
-e471dfe8b5bdc6729ed3343f94b8c558 *man/qn.test.Rd
-7d3b3ef495a17129a7a77469ae5cb7b6 *man/qn.test.combined.Rd
+68faa176d8f8e9193add70b2c29e4425 *man/qn.test.Rd
+d71a387a6f492885d9369cf14102eaca *man/qn.test.combined.Rd
 a19c755fd44a3129fb06841b69978359 *src/kSamples.c
 f15b6fd29a344f0f5824e876ac5129dd *src/myfuns.h

@@ -46,9 +46,9 @@ or random sampling, when viewing tests conditionally given the observed tie patt
 \tabular{ll}{
 Package: \tab kSamples\cr
 Type: \tab Package\cr
-Version: \tab 1.2-6\cr
-Date: \tab 2017-06-14\cr
-License: \tab GPL version 2 or newer\cr
+Version: \tab 1.2-8\cr
+Date: \tab 2018-06-02\cr
+License: \tab GPL (>=2)\cr
 LazyLoad: \tab yes\cr
 }
 }
