@@ -136,9 +136,35 @@ sizes of \eqn{n_1, \ldots, n_k}, as appropriate under treatment randomization. T
 enumeration and simulation are both done in C.
 }
 
+\note{
+It has recently come to our attention that the Anderson-Darling test, originally 
+proposed by Pettitt (1976) in the 2-sample case and generalized to k samples by
+Scholz and Stephens, has a close relative created by Baumgartner et al (1998) in
+the 2 sample case and populatized by Neuhaeuser (2012) with at least 6 papers 
+among his cited references and generalized by Murakami (2006) to k samples.
+}
+
 \references{
+Baumgartner, W., Weiss, P. and Schindler, H. (1998), A nonparametric test for the 
+general two-sample problem, \emph{Bionetrics}, \bold{54}, 1129-1135.
+
 Knuth, D.E. (2011), \emph{The Art of Computer Programming, Volume 4A 
 Combinatorial Algorithms Part 1}, Addison-Wesley
+
+
+Neuhaeuser, M. (2012), \emph{Nonparametric Statistical Tests, A Computational Approach},
+CRC Press.
+
+Murakami, H. (2006), A k-sample rank test based on modified Baumgartner statistic and
+it power comparison, 
+\emph{Jpn. Soc. Comp. Statist.}, \bold{19}, 1-13.
+
+Murakami, H. (2012), Modified Baumgartner statistic for the two-sample and multisample 
+problems: a numerical comparison.
+\emph{J. of Statistical Comput. and Simul.}, \bold{82:5}, 711-728.
+
+Pettitt, A.N. (1976), A two-sample Anderson_Darling rank statistic, \emph{Biometrika},
+\bold{63}, 161-168.
 
 Scholz, F. W. and Stephens, M. A. (1987), K-sample Anderson-Darling Tests, 
 \emph{Journal of the American Statistical Association}, 
