@@ -37,12 +37,12 @@ function (x, ...)
 		}
     		
     		if(x$method=="simulated") cat(paste("Based on Nsim =",x$Nsim,"simulations\n\n"))
-    		if(x$test.name == "Anderson-Darling" ){print(signif(x$ad,4))}
-		if(x$test.name == "van der Waerden scores" ) print(signif(x$qn,4))
-		if(x$test.name == "Kruskal-Wallis" ) print(signif(x$qn,4))
-		if(x$test.name == "normal scores" ) print(signif(x$qn,4))
+    		if(x$test.name == "Anderson-Darling" ){print(signif(x$ad,5))}
+		if(x$test.name == "van der Waerden scores" ) print(signif(x$qn,5))
+		if(x$test.name == "Kruskal-Wallis" ) print(signif(x$qn,5))
+		if(x$test.name == "normal scores" ) print(signif(x$qn,5))
  		if(x$test.name == "Jonckheere-Terpstra" ){
-			print(signif(x$JT,4))
+			print(signif(x$JT,5))
 		}
 		if (x$warning) {
         		cat("\n\nWarning: At least one sample size is less than 5,\n")
@@ -84,7 +84,7 @@ function (x, ...)
         		if(x$method=="simulated") cat(paste("Based on Nsim =",x$Nsim,"simulations\n\n"))
 	    		for(i in 1:nx){
 				cat(paste("for data set",i,"we get\n"))
-    				print(signif(x$ad.list[[i]],4))
+    				print(signif(x$ad.list[[i]],5))
             			cat("\n")
     			}
 			cat("Combined Anderson-Darling Criterion: AD.comb =",AD.name,"\n")
@@ -93,7 +93,7 @@ function (x, ...)
 	    		cat("\n")
         		if(x$method=="simulated") cat(paste("Based on Nsim =",x$Nsim,"simulations\n\n"))
 			ad.c <- x$ad.c
-	    		print(signif(ad.c,4))
+	    		print(signif(ad.c,5))
 		}
 
     		if(x$test.name == "van der Waerden scores" | 
@@ -103,13 +103,13 @@ function (x, ...)
         		if(x$method=="simulated") cat(paste("Based on Nsim =",x$Nsim,"simulations\n\n"))
 	   	 	for(i in 1:nx){
 				cat(paste("for data set",i,"we get\n"))
-    				print(signif(x$qn.list[[i]],4))
+    				print(signif(x$qn.list[[i]],5))
             			cat("\n")
     			}
 			cat("Combined Criterion: QN.combined =",QN.name,"\n")
 			cat("\n")
         		if(x$method=="simulated") cat(paste("Based on Nsim =",x$Nsim,"simulations\n\n"))
-	    		print(signif(x$qn.c,4))
+	    		print(signif(x$qn.c,5))
 		}
     		if (x$warning) {
         		cat("\n\nWarning: At least one sample size is less than 5,\n")
@@ -121,7 +121,7 @@ function (x, ...)
   	if(x$test.name == "2 x t Contingency Table"){
    	 	cat(paste("\n      Kruskal-Wallis Test for 2 x",x$t,"Contingency Table\n\n"))
    		if(x$method=="simulated") cat(paste("      Based on Nsim =", x$Nsim,"simulations\n\n"))
-		print(signif(x$KW.cont,4))
+		print(signif(x$KW.cont,5))
 		cat("\n")
 		invisible(x)
 	}
@@ -131,7 +131,7 @@ function (x, ...)
 		nx <- length(x$kw.list)
 		for( i in 1:nx){
 				cat(paste("for data set",i,"we get\n"))
-    				print(signif(x$kw.list[[i]],4))
+    				print(signif(x$kw.list[[i]],5))
             			cat("\n")
 		}
 		if(nx>3) KW.name=paste("KW.1","...",paste("KW.",k,sep=""),sep="+")
@@ -140,12 +140,12 @@ function (x, ...)
 		cat("Combined Criterion: KW.combined =",KW.name,"\n")
 			cat("\n")
         		if(x$method=="simulated") cat(paste("Based on Nsim =",x$Nsim,"simulations\n\n"))
-	    		print(signif(x$kw.c,4))
+	    		print(signif(x$kw.c,5))
 			cat("\n")
 		invisible(x)
 	}
   	if(x$test.name == "Steel"){
-                print(signif(x$st,4))
+                print(signif(x$st,5))
 		invisible(x)
 	}
 	if(x$test.name == "Steel.bounds"){

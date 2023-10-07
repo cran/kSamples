@@ -1,5 +1,5 @@
 pp.kSamples <- function(x){
-if(class(x) != "kSamples") stop('input not of class "kSamples"\n')
+if(!inherits(x,"kSamples", TRUE)) stop('input not of class "kSamples"\n')
 if(x$test.name == "Anderson-Darling"){
 		if(is.null(x$null.dist1)) stop("the null.dist1 & null.dist2 components of input are NULL\n")
 	}else{

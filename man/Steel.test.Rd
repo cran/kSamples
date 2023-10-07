@@ -149,7 +149,7 @@ Lehmann, E.L. (2006),
 \emph{Nonparametrics, Statistical Methods Based on Ranks, Revised First Edition},
 Springer Verlag.
 
-Scholz, F.W. (2016), "On Steel's Test with Ties", submitted to \emph{Journal of Nonparametric Statistics}.
+Scholz, F.W. (2023), "On Steel's Test with Ties", \url{https://arxiv.org/abs/2308.05873}
 }
 \section{warning}{\code{method = "exact"} should only be used with caution.
 Computation time is proportional to the number of enumerations. 

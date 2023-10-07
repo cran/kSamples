@@ -42,16 +42,7 @@ enumeration of all possible splits of the pooled data into samples of
 sizes of \eqn{n_1, \ldots, n_k}, as appropriate under treatment randomization
 or random sampling, when viewing tests conditionally given the observed tie pattern.
 }
-\details{
-\tabular{ll}{
-Package: \tab kSamples\cr
-Type: \tab Package\cr
-Version: \tab 1.2-8\cr
-Date: \tab 2018-06-02\cr
-License: \tab GPL (>=2)\cr
-LazyLoad: \tab yes\cr
-}
-}
+
 
 \author{
 Fritz Scholz and Angie Zhu
@@ -76,6 +67,7 @@ Lehmann, E.L. (2006), \emph{Nonparametrics, Statistical Methods Based on Ranks},
 Revised First Edition, 
 Springer, New York.
 
+Scholz, F.W. (2023), "On Steel's Test with Ties", \url{https://arxiv.org/abs/2308.05873}
 
 Scholz, F. W. and Stephens, M. A. (1987), K-sample Anderson-Darling Tests, \emph{Journal of the American Statistical Association}, 
 \bold{Vol 82, No. 399}, 918--924. 
