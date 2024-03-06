@@ -61,7 +61,7 @@ function (..., data = NULL,
 #					are reported as exact P-values.
 #
 #			dist: 	= FALSE (default) or TRUE, TRUE causes the simulated
-#					or fully enumerated vectors of both AD statstics to be returned
+#					or fully enumerated vectors of both AD statistics to be returned
 #     					as null.dist1 and null.dist2.
 #
 #			Nsim: 	number of simulations to perform, 
