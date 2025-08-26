@@ -16,6 +16,7 @@ randomly to the given subjects.
 Steel.test(\dots, data = NULL, 
 	method = c("asymptotic", "simulated", "exact"),
 	alternative = c("greater","less","two-sided"),
+	continuity.corr = TRUE,
 	dist = FALSE, Nsim = 10000)
 }
 \arguments{
@@ -66,6 +67,11 @@ Steel.test(\dots, data = NULL,
 		statistics is used and a large maximum value is judged significant.
 		
     }
+    \item{continuity.corr}{\code{= TRUE}(default) or \code{FALSE}. If \code{TRUE}, a step .25 or .5
+                is added to or subtracted from the observed Mann-Whitney statistic for
+                the compared samples, depending on existence of ties in those two samples or not,
+                when calculating the normal approximation for the adjusted \eqn{P}-value.
+    }
     \item{dist}{\code{= FALSE} (default) or \code{TRUE}. If \code{TRUE}, the 
 		simulated or fully enumerated null distribution vector \code{null.dist} 
 		is returned for the Steel test statistic, as chosen via \code{alternative}.
@@ -82,7 +88,7 @@ Steel.test(\dots, data = NULL,
 The Steel criterion uses the Wilcoxon test statistic in the pairwise comparisons of the 
 common control sample with each of the treatment samples. These statistics are used in 
 standardized form, using the means and standard deviations as they apply conditionally
-given the tie pattern in the pooled data, see Scholz (2016). This conditional treatment allows for 
+given the tie pattern in the pooled data, see Scholz (2023). This conditional treatment allows for 
 correct usage in the presence of ties and is appropriate either when the samples are independent
 and come from the same distribution (continuous or not) or when treatments are assigned 
 randomly among the total of \code{N} subjects. However, in the case of ties the significance probability
@@ -130,15 +136,21 @@ of the test statistic. It is \code{NULL} when \code{dist = FALSE} or when
 of Mann-Whitney statistics comparing each  observation under treatment \eqn{i (> 1)} 
 against each observation of the control sample.
 }
-\item{mu}{mean vector \eqn{(n_1n_2/2,\ldots,n_1n_k/2)} of \code{W}.} 
-\item{tau}{vector of standard deviations of \code{W}.} 
+\item{Wstand}{standardized version of \code{W}, using \code{mu} and \code{tau} below.}
+\item{pval.asympt.adj}{vector of adjusted \eqn{P}-values for each component of \code{Wstand} based the normal approximation for the Steel statistic. The smallest of these also serves as 
+approximate \eqn{P}-value for the Steel test.}
+\item{pval.adj}{vector of adjusted \eqn{P}-values for each component of \code{Wstand} based the exact or 
+simulated distribution of \code{Wstand} if method \code{method = "simulated"} or \code{"exact"} is used.
+The smallest of these also serves as simulated or exact \eqn{P}-value for the Steel test.}
+\item{mu}{mean vector \eqn{(\mu_1,\ldots,\mu_{k-1})=(n_1n_2/2,\ldots,n_1n_k/2)} of \code{W}.} 
+\item{tau}{vector \eqn{(\tau_1,\ldots,\tau_{k-1})} of standard deviations of \code{W}.} 
 
 \item{sig0}{standard deviation used in calculating the significance probability
-of the maximum (minimum) of (absolute) standardized Mann-Whitney statistics, see Scholz (2016).}
+of the maximum (minimum) of (absolute) standardized Mann-Whitney statistics, see Scholz (2023).}
 \item{sig}{vector 
 \eqn{(\sigma_1,\ldots, \sigma_k)}
 of standard deviations used in calculating the significance probability
-of the maximum (minimum) of (absolute)  standardized Mann-Whitney statistics, see Scholz (2016).}
+of the maximum (minimum) of (absolute)  standardized Mann-Whitney statistics, see Scholz (2023).}
 
 }
 \references{
@@ -170,13 +182,13 @@ y <- c(z1, z2, z3, z4)
 g <- as.factor(c(rep(1, 6), rep(2, 6), rep(3, 6), rep(4, 6)))
 set.seed(2627)
 Steel.test(list(z1, z2, z3, z4), method = "simulated", 
-  alternative = "less", Nsim = 1000)
+  alternative = "less", continuity.corr = FALSE, Nsim = 1000)
 # or with same seed
 # Steel.test(z1, z2, z3, z4,method = "simulated", 
-#   alternative = "less", Nsim = 1000)
+#   alternative = "less", continuity.corr = FALSE, Nsim = 1000)
 # or with same seed
 # Steel.test(y ~ g, method = "simulated", 
-#   alternative = "less", Nsim=1000)
+#   alternative = "less", continuity.corr = FALSE, Nsim=1000)
 }
 
 \keyword{nonparametric}

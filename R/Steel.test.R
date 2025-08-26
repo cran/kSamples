@@ -1,6 +1,6 @@
 Steel.test <-
 function (..., data = NULL, method=c("asymptotic","simulated","exact"),
-		alternative = c("greater","less","two-sided"),
+		alternative = c("greater","less","two-sided"), continuity.corr = TRUE,
 		dist=FALSE,Nsim=10000) 
 {
 #############################################################################
@@ -78,6 +78,9 @@ function (..., data = NULL, method=c("asymptotic","simulated","exact"),
 #			treatment rank sum is used as test statistic. The test rejects 
 #                       for large values of this maximum.
 #
+#   continuity.corr:   = TRUE (default) a step .25 or .5 is added/subtracted to the observed 
+#                      Mann-Whitney statistic depending on existing or no ties in the 
+#                      compared samples.
 #
 #		dist: 	= FALSE (default) or TRUE, TRUE causes the simulated
 #			or fully enumerated vector of the Steel statistic 
@@ -99,27 +102,31 @@ function (..., data = NULL, method=c("asymptotic","simulated","exact"),
 # z3 <- c( 89, 132,  86, 114, 114, 125)
 # z4 <- c( 92, 114,  86, 119, 131,  94)
 #set.seed(27)
-#Steel.test(z1,z2,z3,z4,method="simulated",
-#   alternative="less",Nsim=100000)
-# or
-#Steel.test(list(z1,z2,z3,z4),method="simulated",
-#   alternative="less",Nsim=100000)
+#Steel.test(z1,z2,z3,z4, method = "simulated", 
+#         alternative = "less", Nsim = 100000)
+#or
+#Steel.test(list(z1,z2,z3,z4), method = "simulated", 
+#         alternative = "less", Nsim = 100000)
+#
 #produces the output below.
 #
-#  Steel Mutiple Wilcoxon Test: k treatments against a common control
+#Steel Multiple Comparison Wilcoxon Test:
+#k treatments against a common control (1st sample)
 #
+#Steel.test(list(z1,z2,z3,z4), method = "simulated", alternative = "less", Nsim = 100000,dist=TRUE)
 #
 #Number of samples:  4
 #Sample sizes:  6, 6, 6, 6
 #Number of ties: 7
-#
 #
 #Null Hypothesis: All samples come from a common population.
 #
 #Based on Nsim = 1e+05 simulations
 #
 #  test statistic  asympt. P-value     sim. P-Value 
-#     -1.77126551       0.09459608       0.10474000 
+#       -1.771300         0.094596         0.104740 
+#
+#
 #############################################################################
 # In order to get the output list, call 
 # st.out <- Steel.test(list(z1,z2,z3,z4),method="simulated",
@@ -134,6 +141,7 @@ function (..., data = NULL, method=c("asymptotic","simulated","exact"),
 # where
 # test.name = "Steel"
 # k = number of samples being compared, including the control sample
+# alternative = "greater","less", or "twosided")
 # ns = vector of the k sample sizes ns[1],...,ns[k]
 # N = ns[1] + ... + ns[k] total sample size
 # n.ties = number of ties in the combined set of all N observations
@@ -148,21 +156,30 @@ function (..., data = NULL, method=c("asymptotic","simulated","exact"),
 # method = one of the following values: "asymptotic", "simulated", "exact"
 # 			as it was ultimately used.
 # Nsim = number of simulations used, when applicable.
+# W = vector of Mann-Whitney statistics W.X1X2, ..., W.X1Xk
+# Wstand = (W-mu)/tau
+# pval.asympt.adj = adjusted asymptotic p-values based on the asymptotic distribution of the 
+#      Steel statistic.
+# Wstand = vector of standardized W, 
+# pval.asympt.adj = adjusted p-values for all observed Wstand, based on normal approximation 
+#                   to the Steel distribution.
+# pval.adj = adjusted p-values for all observed Wstand, based on simulated or 
+# exact Steel distribution, if present.
+#     The smallest of pval.asympt.adj and pval.adj serves also as overall p-value 
+#     for the Steel test.
 # mu = the vector of means for the Mann-Whitney statistics W.XY
+# tau = vector of standard deviations of  W.X1X2, ..., W.X1Xk
 # sig0 = standard deviation of V.0, when W.X1Xi are viewed as n.i^2 * V.0 + V.i
 #        with V.0, V.1, ..., V.(k-1) independent with means zero.
 # sig = vector of standard deviations ofV.1, ..., V.(k-1)
-# tau = vector of standard deviations of  W.X1X2, ..., W.X1Xk
 #    all these means and standard deviations are conditional on the tie
 #    pattern and are either used in the standardization of the W.X1Xi
-#    or in the normal approximation. 
-# W = vector of Mann-Whitney statistics W.X1X2, ..., W.X1Xk
-#
+#    and/or in the normal approximation. 
 # The class ksamples causes st.out to be printed in a special output
 # format when invoked simply as: > st.out
 # An example was shown above.
 #
-# Fritz Scholz, May 2012
+# Fritz Scholz, August 2025
 #
 #################################################################################
 
@@ -196,10 +213,16 @@ if(alt==-1){
 }
 
 Wvec <- numeric(k-1)
+corr <- numeric(k-1)
 xst <- 0
 for(i in 2:k){
 xst <- xst + ns[i-1]
 Wvec[i-1] <- sum( rank( c(x[1:ns[1]],x[xst+1:ns[i]]) )[ns[1]+1:ns[i]])-ns[i]*(ns[i]+1)/2
+if(length(unique(c(x[1:ns[1]],x[xst+1:ns[i]]))) < ns[1]+ns[i]){
+	corr[i-1] <- .25
+	}else{
+	corr[i-1] <- .5
+	}
 }
 Steelobs <- 0
 pval <- 0
@@ -238,7 +261,6 @@ if( method == "exact" & Nsim < ncomb) {
 }
 if( method == "exact" & dist == TRUE ) nrow <- ncomb
 if( method == "simulated" & dist == TRUE ) nrow <- Nsim
-if( method == "simulated" ) ncomb <- 1 # don't need ncomb anymore
 if(method == "asymptotic"){
 	Nsim <- 1
 	dist <- FALSE
@@ -263,17 +285,20 @@ out <- .C("Steeltest", pval=as.double(pval),
 		Steelvec = as.double(Steelvec), PACKAGE = "kSamples")
 Steelobs <- out$Steelobs
 # changes Steelobs back to make up for earlier sign change
-if(alternative == "less") Steelobs <- -Steelobs
+if(alternative == "less"){ 
+	Steelobs <- -Steelobs
+	Wvec <- ns[1]*ns[2:k]-Wvec
+	}
+
+Wvec.stand <- (Wvec-mu)/tau
 pval <- out$pval
 if(dist){
 	Steelvec <- out$Steelvec
 	if(alternative == "less") Steelvec <- - Steelvec
 }
 if(dist == F | method == "asymptotic") Steelvec <- NULL
-if(alternative != "less"){
-	pval.asympt <- Steelnormal(mu,sig0,sig,tau,Wvec,ni,alternative)}else{
-	pval.asympt <- Steelnormal(mu,sig0,sig,tau,Wvec,ni,"greater")
-}
+pval.asympt.adj <- Steelnormal(mu,sig0,sig,tau,Wvec,ni,alternative,continuity.corr,corr)
+pval.asympt <- min(pval.asympt.adj)
 if(method=="asymptotic"){
 	st <- c(Steelobs,pval.asympt)
 }else{
@@ -291,11 +316,32 @@ if(method=="simulated"){
 warning <- FALSE
 if(min(ns) < 5) warning <- TRUE
 if(dist == FALSE) null.dist <- NULL
+pval.adj <- NULL
+if(method == "simulated" | method == "exact"){
+    pval.adj <- numeric(k-1)
+    if(alternative =="two-sided"){   Wvec.standa <- abs(Wvec.stand)
+    				      Steelveca <- abs(Steelvec)
+    		                     for(j in 1:(k-1)){
+    			                pval.adj[j] <- mean(Steelveca >= Wvec.standa[j])
+    		                     }
+    }			            
+    if(alternative == "less"){
+                                    for(j in 1:(k-1)){
+    			                pval.adj[j] <- mean(Steelvec <= Wvec.stand[j])
+    		              }
+    }
+    if(alternative == "greater"){ 
+    		                     for(j in 1:(k-1)){
+    			                pval.adj[j] <- mean(Steelvec >= Wvec.stand[j])
+    		                     }
+    		                 }      
+}
 
 object <- list(test.name = "Steel", k = k, alternative = alternative,
 		ns = ns, N = n, n.ties = n - L,
 		st = st, warning = warning, null.dist = Steelvec,
-		method=method, Nsim=Nsim, W=Wvec, mu=mu, tau=tau, sig0=sig0, sig=sig)
+		method=method, Nsim=Nsim, W=Wvec, Wstand = Wvec.stand, pval.asympt.adj = pval.asympt.adj,
+		pval.adj = pval.adj, mu=mu, tau=tau, sig0=sig0, sig=sig)
     class(object) <- "kSamples"
     object
 

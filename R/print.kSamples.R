@@ -13,7 +13,7 @@ function (x, ...)
 #
 #######################################################
 	if(names(x)[2]=="k"){# checking whether the object x 
-                         #came from ad.test or qn.test of JT.test
+                         #came from ad.test or qn.test or JT.test etc
 		if(x$test.name=="Steel"){
 			cat("\nSteel Multiple Comparison Wilcoxon Test:\nk treatments against a common control (1st sample)\n\n")
 		}else{

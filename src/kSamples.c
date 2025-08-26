@@ -614,7 +614,6 @@ void adkPVal(double *pval, int Nsim, int k, double *x, int *ns,
 	
 	int nsum = getSum(ns, k); 
      	/* total sample size = n_1 + ... + n_k */
-	int index;
 	double adk[2];
 	/* initializes static variables */
 	initvals1(k, x, ns, zstar, L);
@@ -647,8 +646,6 @@ void adkPVal(double *pval, int Nsim, int k, double *x, int *ns,
 		
 	
 	} else { /* uses Nsim simulations to get p-value */
-		double randy;
-		double temp;
 		double adksim[2];
 		double xc[nsum]; /* copy of x */
 		
@@ -1086,10 +1083,10 @@ void contingency2xtSim0(int *Avec, int *Bvec, int *tnum,
  * modified 06/11/2015 Fritz Scholz
  ***************************/
 
-static int getQNdist; 
-            /* logical value to indicate whether generated QN
-               values are recorded in QNvec               */
-static double *QNvec; 
+/* static int getQNdist; 
+            logical value to indicate whether generated QN
+               values are recorded in QNvec               
+static double *QNvec; */
 
 
 /* initializes static variables */
@@ -1205,13 +1202,10 @@ void QNpvalue(double *pval, int Nsim, int k, double *rx,
               double ncomb, double *QNobs, double *QNvec) {
     
 	int i;
-	int j;
-	int Ri;
      int isim;
 
 	int nsum = getSum(ns, k); 
       	/* total sample size = n_1 + ... + n_k */
-	int index;
 	QNinitvals1(k,rx,ns);
 
 	/* get observed test statistic for the average rank score 
@@ -1239,8 +1233,6 @@ void QNpvalue(double *pval, int Nsim, int k, double *rx,
 		/* gets exact p-values */
 		pval[0] = pval[0] / ncomb;
 	} else { /* uses Nsim simulations to get p-value */
-		double randy;
-		double temp;
 		double QNsim[1];
 		double rc[nsum]; /* copy of rx */
 		
@@ -1320,7 +1312,7 @@ static double *mu; /* array of length k-1 for Wilcoxon means for
                       standardization */
 static double *tau; /* array of length k-1 for Wilcoxon std. 
                        devs. for standardization */
-static int getSteeldist; /* logical value to indicate whether 
+/* static int getSteeldist; logical value to indicate whether 
                             generated Steel values are recorded
                             in Steelvec*/
 static int count; /* keeps track of how many combinations have 
@@ -1414,7 +1406,6 @@ void SteelTestStat(double *Steel, int k, double *rx, int *ns){
 	int j;
         int m;
     	double Ri;
-    	double maxR;
     	int istart, iend;
 	istart = ns[0];
 	Ri = 0.0;
@@ -1508,13 +1499,10 @@ void Steelpvalue(double *pval, int Nsim, int k, double *rx,
                  double *Steelvec) {
     
 	int i;
-	int j;
-	int Ri;
     	int isim;
 
 	int nsum = getSum(ns, k); 
           /* total sample size = n_1 + ... + n_k */
-	int index;
 	Steelinitvals1(k, rx, ns, alt, mu, tau);
 	/* get observed test statistic for the average rank score
         vector rx in standardized form */
@@ -1543,8 +1531,6 @@ void Steelpvalue(double *pval, int Nsim, int k, double *rx,
 		/* gets exact p-values */
 		pval[0] = pval[0] / ncomb;
 	} else { /* uses Nsim simulations to get p-value */
-		double randy;
-		double temp;
 		double Steelsim[1];
 		double rc[nsum]; /* copy of rx */
 		
@@ -1954,14 +1940,11 @@ void SteelVec(int Nsim, int k, double *rx, int *ns,
 	int i;
 	int ix;
 	int ccount;
-	int j;
-	int Ri;
     	int isim;
 	int k1=k-1;
 
 	int nsum = getSum(ns, k); 
         /* total sample size = n_1 + ... + n_k */
-	int index;
 
 
 	/* uses R random number generator */
@@ -1981,8 +1964,6 @@ void SteelVec(int Nsim, int k, double *rx, int *ns,
                             MannWhitneyStats);
 		SteelexactVec(0, position, nsum);
 	} else { /* uses Nsim simulations to get p-value */
-		double randy;
-		double temp;
 		double Steelsim[k1];
 		double rc[nsum]; /* copy of rx */
 		
@@ -2154,8 +2135,8 @@ void conv(double *x1, double *p1, int *n1, double *x2,
 
 void convvec(double *x1, int *n1, double *x2, int *n2, 
              double *x, int *n) {
-    int i,j, M;
-    double xij, pij;
+    int i,j;
+    /* double xij, pij;  */
     n[0] = 0;
     for(i=0; i < n1[0]; i++){
 		for(j=0; j < n2[0]; j++){
@@ -2229,10 +2210,10 @@ void Harding0(int *k, int *L1, int *nn, int *nvec, double *freq){
  * modified 08/25/2015 Fritz Scholz
  ***************************/
 
-static int getJTdist; 
-            /* logical value to indicate whether generated JT
-               values are recorded in JTvec               */
-static double *JTvec; 
+/* static int getJTdist; 
+            logical value to indicate whether generated JT
+               values are recorded in JTvec               
+static double *JTvec; */
 
 
 /* initializes static variables */
@@ -2367,13 +2348,10 @@ void JTpvalue(double *pval, int Nsim, int k, double *rx,
               double ncomb, double *JTobs, double *JTvec) {
     
 	int i;
-	int j;
-	int Ri;
      	int isim;
 
 	int nsum = getSum(ns, k); 
       	/* total sample size = n_1 + ... + n_k */
-	int index;
 	JTinitvals1(k,rx,ns);
 
 	/* get observed test statistic for the score vector rx */
@@ -2400,8 +2378,6 @@ void JTpvalue(double *pval, int Nsim, int k, double *rx,
 		/* gets exact p-values */
 		pval[0] = pval[0] / ncomb;
 	} else { /* uses Nsim simulations to get p-value */
-		double randy;
-		double temp;
 		double JTsim[1];
 		double rc[nsum]; /* copy of rx */
 		

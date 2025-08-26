@@ -1,6 +1,15 @@
 \name{NEWS}
 \encoding{UTF-8}
 \title{News for Package \pkg{kSamples}}
+\section{Changes in version 1.2-11 (2025-08-14)}{
+	\subsection{Added adjusted P-values to Steeel.test}{
+		\itemize{
+			\item This was suggested by Prof. Dr.Ludwig Hothorn.
+			\item Asymptotic P-values can be treated with continuity corrections of 1/2 or 1/4
+			as appropriate for the compared samples.
+		}
+	}
+}
 \section{Changes in version 1.2-10 (2023-10-07)}{
 	\subsection{Minor Reference Fixes}{
 		\itemize{
